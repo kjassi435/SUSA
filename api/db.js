@@ -13,6 +13,7 @@ async function getDB() {
   await db.execute('CREATE TABLE IF NOT EXISTS content (key TEXT PRIMARY KEY, page TEXT NOT NULL, label TEXT NOT NULL, html TEXT NOT NULL DEFAULT \'\', updated_at INTEGER NOT NULL)');
   await db.execute('CREATE TABLE IF NOT EXISTS gallery (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL DEFAULT \'\', type TEXT NOT NULL DEFAULT \'image\', url TEXT NOT NULL, caption TEXT NOT NULL DEFAULT \'\', sort INTEGER NOT NULL DEFAULT 0)');
   await db.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL DEFAULT \'\')');
+  await db.execute('CREATE TABLE IF NOT EXISTS submissions (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, data TEXT NOT NULL DEFAULT \'{}\', status TEXT NOT NULL DEFAULT \'new\', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)');
   await seed(db);
   return db;
 }

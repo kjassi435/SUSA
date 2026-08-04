@@ -47,6 +47,8 @@
     <nav class="admin-nav">
       <button class="admin-nav-item active" data-tab="dashboard"><i class="fas fa-gauge-high"></i><span> Dashboard</span></button>
       <button class="admin-nav-item" data-tab="pages"><i class="fas fa-file-lines"></i><span> Pages</span></button>
+      <button class="admin-nav-item" data-tab="gallery"><i class="fas fa-images"></i><span> Gallery</span></button>
+      <button class="admin-nav-item" data-tab="submissions"><i class="fas fa-envelope-open-text"></i><span> Submissions</span></button>
       <button class="admin-nav-item" data-tab="settings"><i class="fas fa-gear"></i><span> Settings</span></button>
     </nav>
     <div class="admin-sidebar-footer">
@@ -67,12 +69,14 @@
         <div class="admin-card"><i class="fas fa-file-lines"></i><strong id="statPages">0</strong><span>Pages</span></div>
         <div class="admin-card"><i class="fas fa-edit"></i><strong id="statSections">0</strong><span>Editable Sections</span></div>
         <div class="admin-card"><i class="fas fa-images"></i><strong id="statGallery">0</strong><span>Gallery Items</span></div>
-        <div class="admin-card"><i class="fas fa-server"></i><strong id="statStatus">—</strong><span>API Status</span></div>
+        <div class="admin-card"><i class="fas fa-envelope-open-text"></i><strong id="statSubmissions">0</strong><span>Submissions</span></div>
       </div>
       <div class="admin-panel">
         <h3>Quick actions</h3>
         <div class="admin-quick-grid">
           <button class="admin-quick" data-go="pages"><i class="fas fa-pen"></i> Edit page content</button>
+          <button class="admin-quick" data-go="gallery"><i class="fas fa-images"></i> Manage gallery</button>
+          <button class="admin-quick" data-go="submissions"><i class="fas fa-envelope-open-text"></i> View submissions</button>
           <button class="admin-quick" data-go="settings"><i class="fas fa-gear"></i> Update contact info</button>
         </div>
       </div>
@@ -111,6 +115,86 @@
         </form>
       </div>
     </section>
+
+    <!-- GALLERY -->
+    <section class="admin-tab" id="tab-gallery">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">Gallery Items</h3>
+          <label class="admin-btn admin-btn-gold" style="cursor:pointer"><i class="fas fa-upload"></i> Upload Image
+            <input type="file" accept="image/*" id="galleryUpload" hidden>
+          </label>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Upload images to the gallery. Drag to reorder. Click delete to remove.</p>
+        <div class="gallery-grid" id="galleryGrid"></div>
+        <p class="admin-hint" id="galleryEmpty" hidden>No gallery items yet. Upload your first image above.</p>
+      </div>
+    </section>
+
+    <!-- SUBMISSIONS -->
+    <section class="admin-tab" id="tab-submissions">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+          <h3 style="margin:0">Form Submissions</h3>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="subFilter" class="admin-field" style="width:auto;padding:6px 10px;font-size:12px">
+              <option value="">All Types</option>
+              <option value="franchise">Franchise</option>
+              <option value="contact">Contact</option>
+            </select>
+            <select id="subStatusFilter" class="admin-field" style="width:auto;padding:6px 10px;font-size:12px">
+              <option value="">All Status</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="in_review">In Review</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="submissions-table-wrap">
+          <table class="submissions-table" id="submissionsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="submissionsBody"></tbody>
+          </table>
+        </div>
+        <p class="admin-hint" id="subEmpty" hidden>No submissions yet.</p>
+      </div>
+    </section>
+
+    <!-- SUBMISSION DETAIL MODAL -->
+    <div class="sub-modal" id="subModal" hidden>
+      <div class="sub-modal-overlay" id="subModalOverlay"></div>
+      <div class="sub-modal-card">
+        <div class="sub-modal-header">
+          <h3 id="subModalTitle">Submission Details</h3>
+          <button class="sub-modal-close" id="subModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sub-modal-body" id="subModalBody"></div>
+        <div class="sub-modal-footer">
+          <select id="subModalStatus" class="admin-field" style="width:auto;padding:8px 12px;font-size:12px">
+            <option value="new">New</option>
+            <option value="contacted">Contacted</option>
+            <option value="in_review">In Review</option>
+            <option value="completed">Completed</option>
+          </select>
+          <div style="display:flex;gap:8px">
+            <button class="admin-btn admin-btn-gold" id="subModalSave"><i class="fas fa-floppy-disk"></i> Update Status</button>
+            <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="subModalDelete"><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 </div>
 

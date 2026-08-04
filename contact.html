@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us — SUSA ENTERPRISE</title>
+  <title>Contact Us ï¿½ SUSA ENTERPRISE</title>
   <meta name="description" content="Contact SUSA ENTERPRISE about franchise opportunities, equipment, or general enquiries. Start your bakery journey today.">
   <link rel="icon" type="image/png" href="images/Untitled design (2).png">
   <link rel="canonical" href="https://shusha-enterprise.netlify.app/contact.html">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SUSA ENTERPRISE">
-  <meta property="og:title" content="Contact — SUSA ENTERPRISE">
+  <meta property="og:title" content="Contact ï¿½ SUSA ENTERPRISE">
   <meta property="og:description" content="Contact SUSA ENTERPRISE about franchise opportunities, equipment, or general enquiries. Start your bakery journey today.">
   <meta property="og:image" content="images/Untitled design (2).png">
   <meta property="og:url" content="https://shusha-enterprise.netlify.app/contact.html">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Contact — SUSA ENTERPRISE">
+  <meta name="twitter:title" content="Contact ï¿½ SUSA ENTERPRISE">
   <meta name="twitter:description" content="Contact SUSA ENTERPRISE about franchise opportunities, equipment, or general enquiries.">
   <meta name="twitter:image" content="images/Untitled design (2).png">
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Organization","name":"SUSA ENTERPRISE","description":"Turnkey bakery and café franchise in India. We build the bakery. You own the brand.","url":"https://shusha-enterprise.netlify.app","logo":"https://shusha-enterprise.netlify.app/images/Untitled%20design%20(2).png","address":{"@type":"PostalAddress","streetAddress":"82/6 Shaikh Para Lane, Chatterjee Hat","addressLocality":"Howrah","addressRegion":"West Bengal","postalCode":"711104","addressCountry":"IN"},"contactPoint":[{"@type":"ContactPoint","telephone":"+91-9609406997","contactType":"sales"},{"@type":"ContactPoint","telephone":"+966-590831351","contactType":"sales"}]}
+  {"@context":"https://schema.org","@type":"Organization","name":"SUSA ENTERPRISE","description":"Turnkey bakery and cafï¿½ franchise in India. We build the bakery. You own the brand.","url":"https://shusha-enterprise.netlify.app","logo":"https://shusha-enterprise.netlify.app/images/Untitled%20design%20(2).png","address":{"@type":"PostalAddress","streetAddress":"82/6 Shaikh Para Lane, Chatterjee Hat","addressLocality":"Howrah","addressRegion":"West Bengal","postalCode":"711104","addressCountry":"IN"},"contactPoint":[{"@type":"ContactPoint","telephone":"+91-9609406997","contactType":"sales"},{"@type":"ContactPoint","telephone":"+966-590831351","contactType":"sales"}]}
   </script>
   <link rel="stylesheet" href="css/common.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,7 +66,7 @@
   <div class="container">
     <span class="label" data-field="badge">Get in Touch</span>
     <h1>Let's start the<br><em>conversation</em></h1>
-    <p data-field="description" data-type="html">Whether you're interested in becoming a franchise partner, buying equipment, or just exploring — we'd love to hear from you.</p>
+    <p data-field="description" data-type="html">Whether you're interested in becoming a franchise partner, buying equipment, or just exploring ï¿½ we'd love to hear from you.</p>
   </div>
 </section>
 
@@ -290,7 +290,7 @@
     <div class="fade-up">
       <details class="faq-item" open>
         <summary data-field="q1">Is there an application fee?</summary>
-        <p data-field="a1" data-type="html">Yes. A one-time, non-refundable registration fee of ?4,999 is payable when you submit your franchise application. There is no separate franchise fee — your investment goes directly into your store.</p>
+        <p data-field="a1" data-type="html">Yes. A one-time, non-refundable registration fee of ?4,999 is payable when you submit your franchise application. There is no separate franchise fee ï¿½ your investment goes directly into your store.</p>
       </details>
       <details class="faq-item">
         <summary data-field="q2">What territories are available?</summary>
@@ -298,7 +298,7 @@
       </details>
       <details class="faq-item">
         <summary data-field="q3">How long does the process take?</summary>
-        <p data-field="a3" data-type="html">Most SUSA stores open within 10—12 weeks from design approval. Timelines vary by format, site readiness, and local permits.</p>
+        <p data-field="a3" data-type="html">Most SUSA stores open within 10ï¿½12 weeks from design approval. Timelines vary by format, site readiness, and local permits.</p>
       </details>
       <details class="faq-item">
         <summary data-field="q4">Do I need bakery experience?</summary>
@@ -375,8 +375,15 @@
   form.addEventListener('submit', function(e){
     e.preventDefault();
     if(!validateStep(2)){ alert('Please accept the terms before sending.'); return; }
-    form.classList.add('success');
-    form.scrollIntoView({behavior:'smooth', block:'center'});
+    var fd = new FormData(form);
+    var data = {};
+    fd.forEach(function(v,k){ if(k) data[k]=v; });
+    fetch('/api/submissions', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({type:'contact', data: data})
+    }).then(function(){ form.classList.add('success'); form.scrollIntoView({behavior:'smooth', block:'center'}); })
+      .catch(function(){ form.classList.add('success'); form.scrollIntoView({behavior:'smooth', block:'center'}); });
   });
 })();
 </script>

@@ -4,7 +4,7 @@
   const $ = (s, el) => (el || document).querySelector(s);
   const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
 
-  const state = { email: null, activePage: null, pageData: {} };
+  const state = { email: null, activePage: null, pageData: {}, galleryItems: [], submissions: [], activeSubId: null };
 
   // ─── TOAST ───
   const toastEl = $('#toast');
@@ -245,10 +245,12 @@
     $$('.admin-nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === name));
     const tab = $('#tab-' + name);
     if (tab) tab.classList.add('active');
-    const titles = { dashboard: 'Dashboard', pages: 'Pages', settings: 'Settings' };
+    const titles = { dashboard: 'Dashboard', pages: 'Pages', settings: 'Settings', gallery: 'Gallery', submissions: 'Submissions' };
     $('#tabTitle').textContent = titles[name] || name;
     if (name === 'dashboard') loadDashboard();
     if (name === 'settings') loadSettings();
+    if (name === 'gallery') loadGallery();
+    if (name === 'submissions') loadSubmissions();
   }
 
   $$('.admin-nav-item').forEach(n => n.addEventListener('click', () => switchTab(n.dataset.tab)));
@@ -260,12 +262,13 @@
       await api('/api/ping');
       await api('/api/content');
       const gallery = await api('/api/gallery');
+      const subs = await api('/api/submissions').catch(() => ({ submissions: [] }));
       $('#statPages').textContent = PAGES.length;
       $('#statSections').textContent = PAGES.reduce((n, p) => n + p.sections.length, 0);
       $('#statGallery').textContent = gallery.items.length;
-      $('#statStatus').textContent = 'Online';
+      $('#statSubmissions').textContent = (subs.submissions || []).length;
     } catch (e) {
-      $('#statStatus').textContent = 'Offline';
+      $('#statSubmissions').textContent = '—';
     }
   }
 
@@ -442,6 +445,169 @@
       toast('Settings saved ✓');
     } catch (err) { toast(err.message, 'error'); }
   });
+
+  // ─── GALLERY ───
+  async function loadGallery() {
+    const grid = $('#galleryGrid');
+    const empty = $('#galleryEmpty');
+    grid.innerHTML = '<p class="admin-hint">Loading...</p>';
+    empty.hidden = true;
+    try {
+      const res = await api('/api/gallery');
+      state.galleryItems = res.items || [];
+      if (!state.galleryItems.length) { grid.innerHTML = ''; empty.hidden = false; return; }
+      renderGalleryGrid();
+    } catch (e) { grid.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderGalleryGrid() {
+    const grid = $('#galleryGrid');
+    grid.innerHTML = '';
+    state.galleryItems.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'gallery-item';
+      div.dataset.id = item.id;
+      div.innerHTML =
+        '<div class="gallery-item-img">' +
+          '<img src="' + escAttr(item.url) + '" alt="' + escAttr(item.title) + '" onerror="this.style.display=\'none\'">' +
+          '<span class="gallery-item-type">' + esc(item.type) + '</span>' +
+        '</div>' +
+        '<div class="gallery-item-info">' +
+          '<input type="text" class="gallery-item-title" value="' + escAttr(item.title) + '" placeholder="Title">' +
+          '<div class="gallery-item-actions">' +
+            '<button class="admin-btn admin-btn-ghost gallery-save-btn" data-id="' + item.id + '"><i class="fas fa-check"></i></button>' +
+            '<button class="admin-btn gallery-del-btn" data-id="' + item.id + '" style="background:var(--a-danger);color:#fff;padding:8px 12px"><i class="fas fa-trash"></i></button>' +
+          '</div>' +
+        '</div>';
+      div.querySelector('.gallery-save-btn').addEventListener('click', async () => {
+        const title = div.querySelector('.gallery-item-title').value;
+        try {
+          await api('/api/gallery/' + item.id, { method: 'PUT', body: JSON.stringify({ title, type: item.type, url: item.url, caption: item.caption || '' }) });
+          toast('Updated ✓');
+        } catch (e) { toast(e.message, 'error'); }
+      });
+      div.querySelector('.gallery-del-btn').addEventListener('click', async () => {
+        if (!confirm('Delete this gallery item?')) return;
+        try {
+          await api('/api/gallery/' + item.id, { method: 'DELETE' });
+          state.galleryItems = state.galleryItems.filter(g => g.id !== item.id);
+          renderGalleryGrid();
+          toast('Deleted ✓');
+        } catch (e) { toast(e.message, 'error'); }
+      });
+      grid.appendChild(div);
+    });
+  }
+
+  $('#galleryUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const dataBase64 = await fileToDataURL(file);
+      const res = await api('/api/gallery', { method: 'POST', body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, ''), type: 'image', url: '', caption: '' }) });
+      const uploadRes = await api('/api/media', { method: 'POST', body: JSON.stringify({ name: file.name, dataBase64 }) });
+      await api('/api/gallery/' + res.id, { method: 'PUT', body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, ''), type: 'image', url: uploadRes.url, caption: '' }) });
+      toast('Image uploaded ✓');
+      loadGallery();
+    } catch (err) { toast(err.message, 'error'); }
+    e.target.value = '';
+  });
+
+  // ─── SUBMISSIONS ───
+  async function loadSubmissions() {
+    const body = $('#submissionsBody');
+    const empty = $('#subEmpty');
+    body.innerHTML = '<tr><td colspan="8" class="admin-hint">Loading...</td></tr>';
+    empty.hidden = true;
+    try {
+      const res = await api('/api/submissions');
+      state.submissions = res.submissions || [];
+      renderSubmissions();
+    } catch (e) { body.innerHTML = '<tr><td colspan="8" class="admin-hint">Error: ' + esc(e.message) + '</td></tr>'; }
+  }
+
+  function renderSubmissions() {
+    const body = $('#submissionsBody');
+    const empty = $('#subEmpty');
+    const typeFilter = $('#subFilter').value;
+    const statusFilter = $('#subStatusFilter').value;
+    let items = state.submissions;
+    if (typeFilter) items = items.filter(s => s.type === typeFilter);
+    if (statusFilter) items = items.filter(s => s.status === statusFilter);
+    if (!items.length) { body.innerHTML = ''; empty.hidden = false; return; }
+    empty.hidden = true;
+    body.innerHTML = '';
+    const statusLabels = { new: 'New', contacted: 'Contacted', in_review: 'In Review', completed: 'Completed' };
+    const statusColors = { new: '#C8962E', contacted: '#3F6B4A', in_review: '#2C513C', completed: '#8B877C' };
+    items.forEach(sub => {
+      let d = {};
+      try { d = JSON.parse(sub.data); } catch (e) {}
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td>#' + sub.id + '</td>' +
+        '<td><span class="sub-type-badge">' + esc(sub.type) + '</span></td>' +
+        '<td>' + esc(d.fullName || d.name || '—') + '</td>' +
+        '<td>' + esc(d.email || '—') + '</td>' +
+        '<td>' + esc(d.phone || '—') + '</td>' +
+        '<td><span class="sub-status-badge" style="background:' + (statusColors[sub.status] || '#888') + '">' + (statusLabels[sub.status] || sub.status) + '</span></td>' +
+        '<td>' + formatDate(sub.created_at) + '</td>' +
+        '<td><button class="admin-btn admin-btn-ghost sub-view-btn" data-id="' + sub.id + '" style="padding:6px 10px;font-size:11px"><i class="fas fa-eye"></i> View</button></td>';
+      tr.querySelector('.sub-view-btn').addEventListener('click', () => openSubModal(sub));
+      body.appendChild(tr);
+    });
+  }
+
+  function openSubModal(sub) {
+    state.activeSubId = sub.id;
+    let d = {};
+    try { d = JSON.parse(sub.data); } catch (e) {}
+    $('#subModalTitle').textContent = (sub.type === 'franchise' ? 'Franchise' : 'Contact') + ' — #' + sub.id;
+    const body = $('#subModalBody');
+    body.innerHTML = '';
+    const fields = Object.entries(d);
+    fields.forEach(([k, v]) => {
+      if (!v && v !== 0) return;
+      const row = document.createElement('div');
+      row.className = 'sub-detail-row';
+      row.innerHTML = '<strong>' + esc(k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase())) + '</strong><span>' + esc(String(v)) + '</span>';
+      body.appendChild(row);
+    });
+    $('#subModalStatus').value = sub.status;
+    $('#subModal').hidden = false;
+  }
+
+  $('#subModalClose').addEventListener('click', () => { $('#subModal').hidden = true; });
+  $('#subModalOverlay').addEventListener('click', () => { $('#subModal').hidden = true; });
+
+  $('#subModalSave').addEventListener('click', async () => {
+    try {
+      await api('/api/submissions', { method: 'PUT', body: JSON.stringify({ id: state.activeSubId, status: $('#subModalStatus').value }) });
+      const sub = state.submissions.find(s => s.id === state.activeSubId);
+      if (sub) sub.status = $('#subModalStatus').value;
+      renderSubmissions();
+      toast('Status updated ✓');
+      $('#subModal').hidden = true;
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#subModalDelete').addEventListener('click', async () => {
+    if (!confirm('Delete this submission?')) return;
+    try {
+      await api('/api/submissions?id=' + state.activeSubId, { method: 'DELETE' });
+      state.submissions = state.submissions.filter(s => s.id !== state.activeSubId);
+      renderSubmissions();
+      toast('Deleted ✓');
+      $('#subModal').hidden = true;
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#subFilter').addEventListener('change', renderSubmissions);
+  $('#subStatusFilter').addEventListener('change', renderSubmissions);
+
+  function formatDate(ts) {
+    const d = new Date(ts);
+    return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
 
   // ─── HELPERS ───
   function fileToDataURL(file) {
