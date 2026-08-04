@@ -16,7 +16,9 @@ module.exports = async function handler(req, res) {
       const body = await readBody(req);
       for (const s of (body.sections || [])) {
         if (typeof s.key === 'string' && typeof s.html === 'string') {
-          await db.execute({ sql: 'UPDATE content SET html = ?, updated_at = ? WHERE key = ?', args: [s.html, Date.now(), s.key] });
+          const page = s.page || s.key.split('.')[0];
+          const label = s.label || s.key;
+          await db.execute({ sql: 'INSERT INTO content (key, page, label, html, updated_at) VALUES (?, ?, ?, ?, ?) ON CONFLICT(key) DO UPDATE SET html = excluded.html, updated_at = excluded.updated_at', args: [s.key, page, label, s.html, Date.now()] });
         }
       }
       return res.json({ ok: true });

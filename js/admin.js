@@ -392,7 +392,7 @@
     try {
       await api('/api/content', {
         method: 'PUT',
-        body: JSON.stringify({ sections: [{ key: sec.key, html: JSON.stringify(data) }] })
+        body: JSON.stringify({ sections: [{ key: sec.key, page: pageId, label: sec.label, html: JSON.stringify(data) }] })
       });
       toast('Saved: ' + sec.label + ' ✓');
       if (!state.pageData[pageId]) state.pageData[pageId] = {};
