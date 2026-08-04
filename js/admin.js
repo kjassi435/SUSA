@@ -4,7 +4,7 @@
   const $ = (s, el) => (el || document).querySelector(s);
   const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
 
-  const state = { email: null, activePage: null, pageData: {}, galleryItems: [], submissions: [], activeSubId: null };
+  const state = { email: null, activePage: null, pageData: {}, galleryItems: [], mediaItems: [], submissions: [], activeSubId: null };
 
   // ─── TOAST ───
   const toastEl = $('#toast');
@@ -245,11 +245,23 @@
     $$('.admin-nav-item').forEach(n => n.classList.toggle('active', n.dataset.tab === name));
     const tab = $('#tab-' + name);
     if (tab) tab.classList.add('active');
-    const titles = { dashboard: 'Dashboard', pages: 'Pages', settings: 'Settings', gallery: 'Gallery', submissions: 'Submissions' };
+    const titles = {
+      dashboard: 'Dashboard', pages: 'Pages', settings: 'Settings', gallery: 'Gallery',
+      media: 'Media Library', testimonials: 'Testimonials', faqs: 'FAQs',
+      services: 'Services & Pricing', documents: 'Documents', seo: 'SEO', promo: 'Promo Bar',
+      submissions: 'Submissions'
+    };
     $('#tabTitle').textContent = titles[name] || name;
     if (name === 'dashboard') loadDashboard();
     if (name === 'settings') loadSettings();
     if (name === 'gallery') loadGallery();
+    if (name === 'media') loadMediaLibrary();
+    if (name === 'testimonials') loadTestimonials();
+    if (name === 'faqs') loadFaqs();
+    if (name === 'services') { loadServices(); loadFormats(); }
+    if (name === 'documents') loadDocuments();
+    if (name === 'seo') loadSeo();
+    if (name === 'promo') loadPromo();
     if (name === 'submissions') loadSubmissions();
   }
 
@@ -263,10 +275,14 @@
       await api('/api/content');
       const gallery = await api('/api/gallery');
       const subs = await api('/api/submissions').catch(() => ({ submissions: [] }));
+      const tests = await api('/api/testimonials').catch(() => ({ items: [] }));
+      const faqs = await api('/api/faqs').catch(() => ({ items: [] }));
       $('#statPages').textContent = PAGES.length;
       $('#statSections').textContent = PAGES.reduce((n, p) => n + p.sections.length, 0);
       $('#statGallery').textContent = gallery.items.length;
       $('#statSubmissions').textContent = (subs.submissions || []).length;
+      $('#statTestimonials').textContent = (tests.items || []).length;
+      $('#statFaqs').textContent = (faqs.items || []).length;
     } catch (e) {
       $('#statSubmissions').textContent = '—';
     }
@@ -412,13 +428,14 @@
     const preview = e.target.closest('.admin-image-row').querySelector('.admin-image-preview');
     try {
       const dataBase64 = await fileToDataURL(file);
-      const res = await api('/api/media', { method: 'POST', body: JSON.stringify({ name: file.name, dataBase64 }) });
-      input.value = res.url;
-      if (preview) { preview.src = res.url; preview.style.display = ''; }
+      const media = await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: (file.type || '').startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
+      const url = '/api/blob?id=' + media.id;
+      input.value = url;
+      if (preview) { preview.src = url; preview.style.display = ''; }
       else {
         const img = document.createElement('img');
         img.className = 'admin-image-preview';
-        img.src = res.url;
+        img.src = url;
         input.closest('.admin-image-row').appendChild(img);
       }
       toast('Image uploaded ✓');
@@ -504,9 +521,8 @@
     if (!file) return;
     try {
       const dataBase64 = await fileToDataURL(file);
-      const res = await api('/api/gallery', { method: 'POST', body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, ''), type: 'image', url: '', caption: '' }) });
-      const uploadRes = await api('/api/media', { method: 'POST', body: JSON.stringify({ name: file.name, dataBase64 }) });
-      await api('/api/gallery/' + res.id, { method: 'PUT', body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, ''), type: 'image', url: uploadRes.url, caption: '' }) });
+      const media = await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: 'image', url: '', data64: dataBase64, size: file.size }) });
+      await api('/api/gallery', { method: 'POST', body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, ''), type: 'image', url: '/api/blob?id=' + media.id, caption: '' }) });
       toast('Image uploaded ✓');
       loadGallery();
     } catch (err) { toast(err.message, 'error'); }
@@ -517,13 +533,13 @@
   async function loadSubmissions() {
     const body = $('#submissionsBody');
     const empty = $('#subEmpty');
-    body.innerHTML = '<tr><td colspan="8" class="admin-hint">Loading...</td></tr>';
+    body.innerHTML = '<tr><td colspan="10" class="admin-hint">Loading...</td></tr>';
     empty.hidden = true;
     try {
       const res = await api('/api/submissions');
       state.submissions = res.submissions || [];
       renderSubmissions();
-    } catch (e) { body.innerHTML = '<tr><td colspan="8" class="admin-hint">Error: ' + esc(e.message) + '</td></tr>'; }
+    } catch (e) { body.innerHTML = '<tr><td colspan="10" class="admin-hint">Error: ' + esc(e.message) + '</td></tr>'; }
   }
 
   function renderSubmissions() {
@@ -543,13 +559,17 @@
       let d = {};
       try { d = JSON.parse(sub.data); } catch (e) {}
       const tr = document.createElement('tr');
+      if (!sub.is_read) tr.className = 'sub-unread';
+      const payLabel = { paid: 'Paid', pending: 'Pending', failed: 'Failed', refunded: 'Refunded' }[sub.payment_status];
       tr.innerHTML =
+        '<td>' + (sub.is_read ? '' : '<span class="sub-dot" title="Unread"></span>') + '</td>' +
         '<td>#' + sub.id + '</td>' +
         '<td><span class="sub-type-badge">' + esc(sub.type) + '</span></td>' +
         '<td>' + esc(d.fullName || d.name || '—') + '</td>' +
         '<td>' + esc(d.email || '—') + '</td>' +
         '<td>' + esc(d.phone || '—') + '</td>' +
         '<td><span class="sub-status-badge" style="background:' + (statusColors[sub.status] || '#888') + '">' + (statusLabels[sub.status] || sub.status) + '</span></td>' +
+        '<td>' + (payLabel ? '<span class="sub-pay-badge">' + payLabel + '</span>' : '—') + '</td>' +
         '<td>' + formatDate(sub.created_at) + '</td>' +
         '<td><button class="admin-btn admin-btn-ghost sub-view-btn" data-id="' + sub.id + '" style="padding:6px 10px;font-size:11px"><i class="fas fa-eye"></i> View</button></td>';
       tr.querySelector('.sub-view-btn').addEventListener('click', () => openSubModal(sub));
@@ -572,8 +592,16 @@
       row.innerHTML = '<strong>' + esc(k.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase())) + '</strong><span>' + esc(String(v)) + '</span>';
       body.appendChild(row);
     });
-    $('#subModalStatus').value = sub.status;
+    if (body.children.length === 0) body.innerHTML = '<p class="admin-hint" style="margin:0">No form data captured.</p>';
+    $('#subModalStatus').value = sub.status || 'new';
+    $('#subModalPayment').value = sub.payment_status || '';
+    $('#subModalPaymentId').textContent = sub.payment_id ? 'Payment ID: ' + sub.payment_id + (sub.payment_method ? ' · ' + sub.payment_method : '') : '';
     $('#subModal').hidden = false;
+    if (!sub.is_read) {
+      api('/api/submissions', { method: 'PUT', body: JSON.stringify({ id: sub.id, is_read: 1 }) })
+        .then(() => { sub.is_read = 1; renderSubmissions(); })
+        .catch(() => {});
+    }
   }
 
   $('#subModalClose').addEventListener('click', () => { $('#subModal').hidden = true; });
@@ -581,11 +609,16 @@
 
   $('#subModalSave').addEventListener('click', async () => {
     try {
-      await api('/api/submissions', { method: 'PUT', body: JSON.stringify({ id: state.activeSubId, status: $('#subModalStatus').value }) });
+      await api('/api/submissions', { method: 'PUT', body: JSON.stringify({
+        id: state.activeSubId,
+        status: $('#subModalStatus').value,
+        payment_status: $('#subModalPayment').value,
+        is_read: 1
+      }) });
       const sub = state.submissions.find(s => s.id === state.activeSubId);
-      if (sub) sub.status = $('#subModalStatus').value;
+      if (sub) { sub.status = $('#subModalStatus').value; sub.payment_status = $('#subModalPayment').value; sub.is_read = 1; }
       renderSubmissions();
-      toast('Status updated ✓');
+      toast('Submission updated ✓');
       $('#subModal').hidden = true;
     } catch (e) { toast(e.message, 'error'); }
   });
@@ -604,10 +637,569 @@
   $('#subFilter').addEventListener('change', renderSubmissions);
   $('#subStatusFilter').addEventListener('change', renderSubmissions);
 
+  $('#csvExport').addEventListener('click', () => {
+    const type = $('#subFilter').value;
+    const status = $('#subStatusFilter').value;
+    const qs = [];
+    if (type) qs.push('type=' + encodeURIComponent(type));
+    if (status) qs.push('status=' + encodeURIComponent(status));
+    qs.push('export=csv');
+    window.location.href = '/api/submissions?' + qs.join('&');
+  });
+
   function formatDate(ts) {
     const d = new Date(ts);
     return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
   }
+
+  // ─── MEDIA LIBRARY ───
+  async function loadMediaLibrary() {
+    const grid = $('#mediaGrid');
+    const empty = $('#mediaEmpty');
+    grid.innerHTML = '<p class="admin-hint">Loading...</p>';
+    empty.hidden = true;
+    try {
+      const res = await api('/api/media-library');
+      const items = res.items || [];
+      if (!items.length) { grid.innerHTML = ''; empty.hidden = false; return; }
+      state.mediaItems = items;
+      renderMediaGrid();
+    } catch (e) { grid.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderMediaGrid() {
+    const grid = $('#mediaGrid');
+    grid.innerHTML = '';
+    (state.mediaItems || []).forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'gallery-item';
+      div.title = 'Click to copy URL';
+      div.style.cursor = 'pointer';
+      const preview = item.type === 'video'
+        ? '<video src="' + escAttr('/api/blob?id=' + item.id) + '" muted preload="metadata" class="media-thumb"></video>'
+        : '<img src="' + escAttr('/api/blob?id=' + item.id + '&t=' + (item.id || '') + '') + '" alt="' + escAttr(item.name) + '" onerror="this.style.display=\'none\'">';
+      div.innerHTML =
+        '<div class="gallery-item-img">' + preview + '<span class="gallery-item-type">' + esc(item.type) + '</span></div>' +
+        '<div class="gallery-item-info">' +
+          '<span class="media-name" title="' + escAttr(item.name) + '">' + esc(item.name) + '</span>' +
+          '<div class="gallery-item-actions">' +
+            '<button class="admin-btn admin-btn-ghost media-copy-btn" data-id="' + item.id + '" title="Copy URL"><i class="fas fa-copy"></i></button>' +
+            '<button class="admin-btn media-del-btn" data-id="' + item.id + '" title="Delete" style="background:var(--a-danger);color:#fff;padding:8px 12px"><i class="fas fa-trash"></i></button>' +
+          '</div>' +
+        '</div>';
+      div.querySelector('.media-copy-btn').addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        navigator.clipboard.writeText('/api/blob?id=' + item.id).then(() => toast('URL copied ✓')).catch(() => toast('Copy failed', 'error'));
+      });
+      div.addEventListener('click', (ev) => {
+        if (ev.target.closest('button')) return;
+        navigator.clipboard.writeText('/api/blob?id=' + item.id).then(() => toast('URL copied ✓')).catch(() => {});
+      });
+      div.querySelector('.media-del-btn').addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if (!confirm('Delete this media item?\nNote: pages referencing it will break.')) return;
+        try {
+          await api('/api/media-library?id=' + item.id, { method: 'DELETE' });
+          state.mediaItems = state.mediaItems.filter(m => m.id !== item.id);
+          renderMediaGrid();
+          toast('Deleted ✓');
+        } catch (e) { toast(e.message, 'error'); }
+      });
+      grid.appendChild(div);
+    });
+  }
+
+  $('#mediaUpload').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const dataBase64 = await fileToDataURL(file);
+      await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: (file.type || '').startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
+      toast('Media uploaded ✓');
+      loadMediaLibrary();
+    } catch (err) { toast(err.message, 'error'); }
+    e.target.value = '';
+  });
+
+  // ─── GENERIC CRUD LIST BUILDER ───
+  function crudRow(id, title, sub, cb, badge) {
+    const row = document.createElement('div');
+    row.className = 'crud-row';
+    row.innerHTML =
+      '<div class="crud-row-main"><div class="crud-row-title">' + title + '</div>' +
+      (sub ? '<div class="crud-row-sub">' + sub + '</div>' : '') + '</div>' +
+      (badge || '') +
+      '<div style="display:flex;gap:6px;align-items:center">' +
+        '<label class="crud-toggle" title="Toggle active"><input type="checkbox"><i></i></label>' +
+        '<button class="admin-btn admin-btn-ghost crud-edit" style="padding:6px 10px;font-size:11px"><i class="fas fa-pen"></i></button>' +
+        '<button class="admin-btn crud-del" style="background:var(--a-danger);color:#fff;padding:6px 10px;font-size:11px"><i class="fas fa-trash"></i></button>' +
+      '</div>';
+    const toggle = row.querySelector('.crud-toggle input');
+    if (cb.onToggle) toggle.checked = !!cb.onToggle();
+    toggle.addEventListener('change', () => { if (cb.onToggleCb) cb.onToggleCb(toggle.checked); });
+    row.querySelector('.crud-edit').addEventListener('click', () => cb.onEdit());
+    row.querySelector('.crud-del').addEventListener('click', () => cb.onDelete());
+    return row;
+  }
+
+  // ─── TESTIMONIALS ───
+  let testimonialsCache = [];
+  async function loadTestimonials() {
+    const list = $('#testimonialsList');
+    const empty = $('#testimonialsEmpty');
+    list.innerHTML = '<p class="admin-hint">Loading...</p>';
+    empty.hidden = true;
+    try {
+      const res = await api('/api/testimonials');
+      testimonialsCache = res.items || [];
+      if (!testimonialsCache.length) { list.innerHTML = ''; empty.hidden = false; return; }
+      renderTestimonials();
+    } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderTestimonials() {
+    const list = $('#testimonialsList');
+    list.innerHTML = '';
+    testimonialsCache.forEach(t => {
+      list.appendChild(crudRow(
+        t.id,
+        '<i class="fas fa-quote-right" style="color:var(--a-gold);margin-right:6px"></i>' + esc(t.name) +
+          (t.role ? ' <span style="color:#8B877C;font-weight:400">· ' + esc(t.role) + '</span>' : ''),
+        esc((t.quote || '').slice(0, 90)) + (t.quote && t.quote.length > 90 ? '…' : ''),
+        {
+          onToggle: () => !!t.active,
+          onToggleCb: async (checked) => { t.active = checked ? 1 : 0; try { await api('/api/testimonials?id=' + t.id, { method: 'PUT', body: JSON.stringify({ active: t.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onEdit: () => openTestimonialModal(t),
+          onDelete: async () => { if (!confirm('Delete this testimonial?')) return; try { await api('/api/testimonials?id=' + t.id, { method: 'DELETE' }); testimonialsCache = testimonialsCache.filter(x => x.id !== t.id); renderTestimonials(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+        }
+      ));
+    });
+  }
+
+  let testimonialEditingId = null;
+  function openTestimonialModal(t) {
+    testimonialEditingId = t ? t.id : null;
+    $('#testimonialModalTitle').textContent = t ? 'Edit Testimonial' : 'Add Testimonial';
+    $('#tName').value = t ? t.name : '';
+    $('#tRole').value = t ? t.role : '';
+    $('#tInitial').value = t ? t.initial : '';
+    $('#tRating').value = t ? t.rating : 5;
+    $('#tQuote').value = t ? t.quote : '';
+    $('#tSort').value = t ? t.sort : 0;
+    $('#tActive').checked = t ? !!t.active : true;
+    $('#tDelete').hidden = !t;
+    $('#testimonialModal').hidden = false;
+  }
+
+  $('#addTestimonial').addEventListener('click', () => openTestimonialModal(null));
+  $('#testimonialModalClose').addEventListener('click', () => { $('#testimonialModal').hidden = true; });
+  $('#testimonialModalOverlay').addEventListener('click', () => { $('#testimonialModal').hidden = true; });
+
+  $('#tSave').addEventListener('click', async () => {
+    const body = {
+      name: $('#tName').value.trim(),
+      role: $('#tRole').value.trim(),
+      initial: $('#tInitial').value.trim(),
+      rating: Number($('#tRating').value) || 5,
+      quote: $('#tQuote').value.trim(),
+      sort: Number($('#tSort').value) || 0,
+      active: $('#tActive').checked ? 1 : 0
+    };
+    if (!body.name) return toast('Name is required', 'error');
+    try {
+      if (testimonialEditingId) await api('/api/testimonials?id=' + testimonialEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/testimonials', { method: 'POST', body: JSON.stringify(body) });
+      toast('Saved ✓');
+      $('#testimonialModal').hidden = true;
+      loadTestimonials();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#tDelete').addEventListener('click', async () => {
+    if (!confirm('Delete this testimonial?')) return;
+    try {
+      await api('/api/testimonials?id=' + testimonialEditingId, { method: 'DELETE' });
+      toast('Deleted ✓');
+      $('#testimonialModal').hidden = true;
+      loadTestimonials();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  // ─── FAQS ───
+  let faqsCache = [];
+  async function loadFaqs() {
+    const list = $('#faqsList');
+    const empty = $('#faqsEmpty');
+    list.innerHTML = '<p class="admin-hint">Loading...</p>';
+    empty.hidden = true;
+    try {
+      const res = await api('/api/faqs');
+      faqsCache = res.items || [];
+      if (!faqsCache.length) { list.innerHTML = ''; empty.hidden = false; return; }
+      renderFaqs();
+    } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderFaqs() {
+    const list = $('#faqsList');
+    list.innerHTML = '';
+    faqsCache.forEach(f => {
+      const pageBadge = f.page ? '<span class="sub-type-badge" style="margin-left:6px">' + esc(f.page) + '</span>' : '';
+      list.appendChild(crudRow(
+        f.id,
+        esc(f.question || ''),
+        esc((f.answer || '').slice(0, 90)) + (f.answer && f.answer.length > 90 ? '…' : '') + pageBadge,
+        {
+          onToggle: () => !!f.active,
+          onToggleCb: async (checked) => { f.active = checked ? 1 : 0; try { await api('/api/faqs?id=' + f.id, { method: 'PUT', body: JSON.stringify({ active: f.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onEdit: () => openFaqModal(f),
+          onDelete: async () => { if (!confirm('Delete this FAQ?')) return; try { await api('/api/faqs?id=' + f.id, { method: 'DELETE' }); faqsCache = faqsCache.filter(x => x.id !== f.id); renderFaqs(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+        }
+      ));
+    });
+  }
+
+  let faqEditingId = null;
+  function openFaqModal(f) {
+    faqEditingId = f ? f.id : null;
+    $('#faqModalTitle').textContent = f ? 'Edit FAQ' : 'Add FAQ';
+    $('#fPage').value = f ? f.page : '';
+    $('#fQuestion').value = f ? f.question : '';
+    $('#fAnswer').value = f ? f.answer : '';
+    $('#fSort').value = f ? f.sort : 0;
+    $('#fActive').checked = f ? !!f.active : true;
+    $('#fDelete').hidden = !f;
+    $('#faqModal').hidden = false;
+  }
+
+  $('#addFaq').addEventListener('click', () => openFaqModal(null));
+  $('#faqModalClose').addEventListener('click', () => { $('#faqModal').hidden = true; });
+  $('#faqModalOverlay').addEventListener('click', () => { $('#faqModal').hidden = true; });
+
+  $('#fSave').addEventListener('click', async () => {
+    const body = {
+      page: $('#fPage').value,
+      question: $('#fQuestion').value.trim(),
+      answer: $('#fAnswer').value.trim(),
+      sort: Number($('#fSort').value) || 0,
+      active: $('#fActive').checked ? 1 : 0
+    };
+    if (!body.question) return toast('Question is required', 'error');
+    try {
+      if (faqEditingId) await api('/api/faqs?id=' + faqEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/faqs', { method: 'POST', body: JSON.stringify(body) });
+      toast('Saved ✓');
+      $('#faqModal').hidden = true;
+      loadFaqs();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#fDelete').addEventListener('click', async () => {
+    if (!confirm('Delete this FAQ?')) return;
+    try {
+      await api('/api/faqs?id=' + faqEditingId, { method: 'DELETE' });
+      toast('Deleted ✓');
+      $('#faqModal').hidden = true;
+      loadFaqs();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  // ─── SERVICES ───
+  let servicesCache = [];
+  async function loadServices() {
+    const list = $('#servicesList');
+    const empty = $('#servicesEmpty');
+    list.innerHTML = '<p class="admin-hint">Loading...</p>';
+    empty.hidden = true;
+    try {
+      const res = await api('/api/services');
+      servicesCache = res.items || [];
+      if (!servicesCache.length) { list.innerHTML = ''; empty.hidden = false; }
+      else renderServices();
+    } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderServices() {
+    const list = $('#servicesList');
+    list.innerHTML = '';
+    servicesCache.forEach(s => {
+      list.appendChild(crudRow(
+        s.id,
+        '<i class="fas ' + esc(s.icon) + '" style="color:var(--a-gold);margin-right:6px"></i>' + esc(s.title),
+        esc((s.description || '').slice(0, 90)) + (s.description && s.description.length > 90 ? '…' : ''),
+        {
+          onToggle: () => !!s.active,
+          onToggleCb: async (checked) => { s.active = checked ? 1 : 0; try { await api('/api/services?id=' + s.id, { method: 'PUT', body: JSON.stringify({ active: s.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onEdit: () => openServiceModal(s),
+          onDelete: async () => { if (!confirm('Delete this service?')) return; try { await api('/api/services?id=' + s.id, { method: 'DELETE' }); servicesCache = servicesCache.filter(x => x.id !== s.id); renderServices(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+        }
+      ));
+    });
+  }
+
+  let serviceEditingId = null;
+  function openServiceModal(s) {
+    serviceEditingId = s ? s.id : null;
+    $('#serviceModalTitle').textContent = s ? 'Edit Service' : 'Add Service';
+    $('#sIcon').value = s ? s.icon : '';
+    $('#sColor').value = s ? s.color : 'gold';
+    $('#sTitle').value = s ? s.title : '';
+    $('#sDesc').value = s ? s.description : '';
+    $('#sSort').value = s ? s.sort : 0;
+    $('#sActive').checked = s ? !!s.active : true;
+    $('#sDelete').hidden = !s;
+    $('#serviceModal').hidden = false;
+  }
+
+  $('#addService').addEventListener('click', () => openServiceModal(null));
+  $('#serviceModalClose').addEventListener('click', () => { $('#serviceModal').hidden = true; });
+  $('#serviceModalOverlay').addEventListener('click', () => { $('#serviceModal').hidden = true; });
+
+  $('#sSave').addEventListener('click', async () => {
+    const body = {
+      icon: $('#sIcon').value.trim(),
+      color: $('#sColor').value,
+      title: $('#sTitle').value.trim(),
+      description: $('#sDesc').value.trim(),
+      sort: Number($('#sSort').value) || 0,
+      active: $('#sActive').checked ? 1 : 0
+    };
+    if (!body.title) return toast('Title is required', 'error');
+    try {
+      if (serviceEditingId) await api('/api/services?id=' + serviceEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/services', { method: 'POST', body: JSON.stringify(body) });
+      toast('Saved ✓');
+      $('#serviceModal').hidden = true;
+      loadServices();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#sDelete').addEventListener('click', async () => {
+    if (!confirm('Delete this service?')) return;
+    try {
+      await api('/api/services?id=' + serviceEditingId, { method: 'DELETE' });
+      toast('Deleted ✓');
+      $('#serviceModal').hidden = true;
+      loadServices();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  // ─── FORMATS ───
+  let formatsCache = [];
+  async function loadFormats() {
+    const list = $('#formatsList');
+    list.innerHTML = '<p class="admin-hint">Loading...</p>';
+    try {
+      const res = await api('/api/formats');
+      formatsCache = res.items || [];
+      renderFormats();
+    } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderFormats() {
+    const list = $('#formatsList');
+    list.innerHTML = '';
+    formatsCache.forEach(fm => {
+      list.appendChild(crudRow(
+        fm.id,
+        esc(fm.name) + ' <span style="color:var(--a-gold)">· ' + esc(fm.range) + '</span>',
+        esc((fm.description || '').slice(0, 90)) + (fm.description && fm.description.length > 90 ? '…' : ''),
+        {
+          onToggle: () => !!fm.active,
+          onToggleCb: async (checked) => { fm.active = checked ? 1 : 0; try { await api('/api/formats?id=' + fm.id, { method: 'PUT', body: JSON.stringify({ active: fm.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onEdit: () => openFormatModal(fm),
+          onDelete: async () => { if (!confirm('Delete this format?')) return; try { await api('/api/formats?id=' + fm.id, { method: 'DELETE' }); formatsCache = formatsCache.filter(x => x.id !== fm.id); renderFormats(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+        }
+      ));
+    });
+  }
+
+  let formatEditingId = null;
+  function openFormatModal(fm) {
+    formatEditingId = fm ? fm.id : null;
+    $('#formatModalTitle').textContent = fm ? 'Edit Format' : 'Add Format';
+    $('#fmName').value = fm ? fm.name : '';
+    $('#fmRange').value = fm ? fm.range : '';
+    $('#fmDesc').value = fm ? fm.description : '';
+    $('#fmSort').value = fm ? fm.sort : 0;
+    $('#fmActive').checked = fm ? !!fm.active : true;
+    $('#fmDelete').hidden = !fm;
+    $('#formatModal').hidden = false;
+  }
+
+  $('#addFormat').addEventListener('click', () => openFormatModal(null));
+  $('#formatModalClose').addEventListener('click', () => { $('#formatModal').hidden = true; });
+  $('#formatModalOverlay').addEventListener('click', () => { $('#formatModal').hidden = true; });
+
+  $('#fmSave').addEventListener('click', async () => {
+    const body = {
+      name: $('#fmName').value.trim(),
+      range: $('#fmRange').value.trim(),
+      description: $('#fmDesc').value.trim(),
+      sort: Number($('#fmSort').value) || 0,
+      active: $('#fmActive').checked ? 1 : 0
+    };
+    if (!body.name) return toast('Name is required', 'error');
+    try {
+      if (formatEditingId) await api('/api/formats?id=' + formatEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/formats', { method: 'POST', body: JSON.stringify(body) });
+      toast('Saved ✓');
+      $('#formatModal').hidden = true;
+      loadFormats();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#fmDelete').addEventListener('click', async () => {
+    if (!confirm('Delete this format?')) return;
+    try {
+      await api('/api/formats?id=' + formatEditingId, { method: 'DELETE' });
+      toast('Deleted ✓');
+      $('#formatModal').hidden = true;
+      loadFormats();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  // ─── DOCUMENTS ───
+  let documentsCache = [];
+  async function loadDocuments() {
+    const list = $('#documentsList');
+    list.innerHTML = '<p class="admin-hint">Loading...</p>';
+    try {
+      const res = await api('/api/documents');
+      documentsCache = res.items || [];
+      renderDocuments();
+    } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  function renderDocuments() {
+    const list = $('#documentsList');
+    list.innerHTML = '';
+    documentsCache.forEach(d => {
+      const linkEl = '<i class="' + esc(d.icon || 'fas fa-file') + '" style="color:var(--a-gold);margin-right:6px"></i>' + esc(d.title) +
+        ' <a class="crud-link" href="' + escAttr(d.url) + '" target="_blank" rel="noopener">open <i class="fas fa-external-link-alt"></i></a>';
+      list.appendChild(crudRow(
+        d.id,
+        linkEl,
+        esc(d.url || ''),
+        {
+          onToggle: () => !!d.active,
+          onToggleCb: async (checked) => { d.active = checked ? 1 : 0; try { await api('/api/documents?id=' + d.id, { method: 'PUT', body: JSON.stringify({ active: d.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onEdit: () => openDocumentModal(d),
+          onDelete: async () => { if (!confirm('Delete this document?')) return; try { await api('/api/documents?id=' + d.id, { method: 'DELETE' }); documentsCache = documentsCache.filter(x => x.id !== d.id); renderDocuments(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+        }
+      ));
+    });
+  }
+
+  let documentEditingId = null;
+  function openDocumentModal(d) {
+    documentEditingId = d ? d.id : null;
+    $('#documentModalTitle').textContent = d ? 'Edit Document' : 'Add Document';
+    $('#dTitle').value = d ? d.title : '';
+    $('#dIcon').value = d ? d.icon : 'fas fa-file';
+    $('#dUrl').value = d ? d.url : '';
+    $('#dFile').value = '';
+    $('#dSort').value = d ? d.sort : 0;
+    $('#dActive').checked = d ? !!d.active : true;
+    $('#dDelete').hidden = !d;
+    $('#documentModal').hidden = false;
+  }
+
+  $('#addDocument').addEventListener('click', () => openDocumentModal(null));
+  $('#documentModalClose').addEventListener('click', () => { $('#documentModal').hidden = true; });
+  $('#documentModalOverlay').addEventListener('click', () => { $('#documentModal').hidden = true; });
+
+  $('#dFile').addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      const dataBase64 = await fileToDataURL(file);
+      const media = await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: file.type && file.type.startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
+      $('#dUrl').value = '/api/blob?id=' + media.id;
+      toast('File uploaded — URL set ✓');
+    } catch (err) { toast(err.message, 'error'); }
+  });
+
+  $('#dSave').addEventListener('click', async () => {
+    const body = {
+      title: $('#dTitle').value.trim(),
+      icon: $('#dIcon').value.trim() || 'fas fa-file',
+      url: $('#dUrl').value.trim(),
+      sort: Number($('#dSort').value) || 0,
+      active: $('#dActive').checked ? 1 : 0
+    };
+    if (!body.title || !body.url) return toast('Title and URL are required', 'error');
+    try {
+      if (documentEditingId) await api('/api/documents?id=' + documentEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/documents', { method: 'POST', body: JSON.stringify(body) });
+      toast('Saved ✓');
+      $('#documentModal').hidden = true;
+      loadDocuments();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  $('#dDelete').addEventListener('click', async () => {
+    if (!confirm('Delete this document?')) return;
+    try {
+      await api('/api/documents?id=' + documentEditingId, { method: 'DELETE' });
+      toast('Deleted ✓');
+      $('#documentModal').hidden = true;
+      loadDocuments();
+    } catch (e) { toast(e.message, 'error'); }
+  });
+
+  // ─── SEO ───
+  async function loadSeo() {
+    const list = $('#seoList');
+    list.innerHTML = '<p class="admin-hint">Loading...</p>';
+    try {
+      const res = await api('/api/seo');
+      const items = res.items || [];
+      list.innerHTML = '';
+      items.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'seo-card';
+        card.innerHTML =
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+            '<strong style="color:var(--a-primary);font-size:13px;text-transform:capitalize">' + esc(s.page) + '</strong>' +
+            '<button class="admin-btn admin-btn-gold seo-save-btn" data-page="' + escAttr(s.page) + '" style="padding:6px 12px;font-size:11px"><i class="fas fa-floppy-disk"></i> Save</button>' +
+          '</div>' +
+          '<label class="admin-field" style="margin-bottom:8px"><span>Title</span><input type="text" class="seo-field" data-k="title" value="' + escAttr(s.title || '') + '"></label>' +
+          '<label class="admin-field" style="margin-bottom:8px"><span>Meta description</span><textarea class="seo-field" data-k="description" rows="2">' + esc(s.description || '') + '</textarea></label>' +
+          '<label class="admin-field" style="margin-bottom:8px"><span>OG image URL</span><input type="text" class="seo-field" data-k="og_image" value="' + escAttr(s.og_image || '') + '"></label>' +
+          '<label class="admin-field" style="margin-bottom:0"><span>Keywords</span><input type="text" class="seo-field" data-k="keywords" value="' + escAttr(s.keywords || '') + '"></label>';
+        const btn = card.querySelector('.seo-save-btn');
+        btn.addEventListener('click', async () => {
+          const data = { page: s.page };
+          card.querySelectorAll('.seo-field').forEach(inp => { data[inp.dataset.k] = inp.value; });
+          try {
+            await api('/api/seo', { method: 'PUT', body: JSON.stringify(data) });
+            toast('SEO saved ✓');
+          } catch (e) { toast(e.message, 'error'); }
+        });
+        list.appendChild(card);
+      });
+    } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
+  }
+
+  // ─── PROMO BAR ───
+  async function loadPromo() {
+    try {
+      const res = await api('/api/promo');
+      $('#promoForm').elements['promoText'].value = res.text || '';
+      $('#promoForm').elements['promoUrl'].value = res.url || '';
+      $('#promoForm').elements['promoEnabled'].checked = res.enabled === '1' || res.enabled === 'true' || res.enabled === true;
+    } catch (e) { toast('Failed to load promo: ' + e.message, 'error'); }
+  }
+
+  $('#promoForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const enabled = $('#promoForm').elements['promoEnabled'].checked ? '1' : '';
+    try {
+      await api('/api/promo', { method: 'PUT', body: JSON.stringify({ enabled, text: e.target.elements['promoText'].value, url: e.target.elements['promoUrl'].value }) });
+      toast('Promo bar saved ✓');
+    } catch (err) { toast(err.message, 'error'); }
+  });
 
   // ─── HELPERS ───
   function fileToDataURL(file) {

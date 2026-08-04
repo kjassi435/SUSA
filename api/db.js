@@ -2,6 +2,23 @@ const { createClient } = require('@libsql/client');
 
 let db = null;
 
+async function migrate(db) {
+  async function addCol(table, col, def) {
+    try {
+      const info = await db.execute('PRAGMA table_info(' + table + ')');
+      if (!info.rows.some(r => r.name === col)) {
+        await db.execute('ALTER TABLE ' + table + ' ADD COLUMN ' + col + ' ' + def);
+      }
+    } catch (e) {}
+  }
+  await addCol('gallery', 'data64', 'TEXT DEFAULT \'\'');
+  await addCol('gallery', 'active', 'INTEGER DEFAULT 1');
+  await addCol('submissions', 'payment_status', 'TEXT DEFAULT \'\'');
+  await addCol('submissions', 'payment_id', 'TEXT DEFAULT \'\'');
+  await addCol('submissions', 'payment_method', 'TEXT DEFAULT \'\'');
+  await addCol('submissions', 'is_read', 'INTEGER DEFAULT 0');
+}
+
 async function getDB() {
   if (db) return db;
   const url = process.env.TURSO_DATABASE_URL;
@@ -14,6 +31,14 @@ async function getDB() {
   await db.execute('CREATE TABLE IF NOT EXISTS gallery (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL DEFAULT \'\', type TEXT NOT NULL DEFAULT \'image\', url TEXT NOT NULL, caption TEXT NOT NULL DEFAULT \'\', sort INTEGER NOT NULL DEFAULT 0)');
   await db.execute('CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL DEFAULT \'\')');
   await db.execute('CREATE TABLE IF NOT EXISTS submissions (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, data TEXT NOT NULL DEFAULT \'{}\', status TEXT NOT NULL DEFAULT \'new\', created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL)');
+  await db.execute('CREATE TABLE IF NOT EXISTS testimonials (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT \'\', role TEXT NOT NULL DEFAULT \'\', quote TEXT NOT NULL DEFAULT \'\', rating INTEGER NOT NULL DEFAULT 5, initial TEXT NOT NULL DEFAULT \'\', sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1)');
+  await db.execute('CREATE TABLE IF NOT EXISTS faqs (id INTEGER PRIMARY KEY AUTOINCREMENT, page TEXT NOT NULL DEFAULT \'\', question TEXT NOT NULL DEFAULT \'\', answer TEXT NOT NULL DEFAULT \'\', sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1)');
+  await db.execute('CREATE TABLE IF NOT EXISTS services (id INTEGER PRIMARY KEY AUTOINCREMENT, icon TEXT NOT NULL DEFAULT \'\', title TEXT NOT NULL DEFAULT \'\', description TEXT NOT NULL DEFAULT \'\', color TEXT NOT NULL DEFAULT \'gold\', sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1)');
+  await db.execute('CREATE TABLE IF NOT EXISTS formats (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT \'\', range TEXT NOT NULL DEFAULT \'\', description TEXT NOT NULL DEFAULT \'\', sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1)');
+  await db.execute('CREATE TABLE IF NOT EXISTS documents (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL DEFAULT \'\', icon TEXT NOT NULL DEFAULT \'fas fa-file\', url TEXT NOT NULL DEFAULT \'\', sort INTEGER NOT NULL DEFAULT 0, active INTEGER NOT NULL DEFAULT 1)');
+  await db.execute('CREATE TABLE IF NOT EXISTS media_lib (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL DEFAULT \'\', type TEXT NOT NULL DEFAULT \'image\', url TEXT NOT NULL DEFAULT \'\', data64 TEXT NOT NULL DEFAULT \'\', size INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)');
+  await db.execute('CREATE TABLE IF NOT EXISTS seo (page TEXT PRIMARY KEY, title TEXT NOT NULL DEFAULT \'\', description TEXT NOT NULL DEFAULT \'\', og_image TEXT NOT NULL DEFAULT \'\', keywords TEXT NOT NULL DEFAULT \'\')');
+  await migrate(db);
   await seed(db);
   return db;
 }
@@ -36,8 +61,11 @@ async function seed(db) {
     ['addressLine2', 'Howrah, West Bengal 711104, India'],
     ['socialInstagram', ''], ['socialLinkedin', ''], ['socialFacebook', ''],
     ['registrationFee', '\u20B94,999'],
+    ['promoEnabled', ''], ['promoText', ''], ['promoUrl', ''],
+    ['notifyWebhook', ''],
   ];
   for (const [k, v] of settings) await db.execute({ sql: 'INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)', args: [k, v] });
+
   const gc = await db.execute('SELECT COUNT(*) AS c FROM gallery');
   if (gc.rows[0].c === 0) {
     const imgs = [
@@ -58,10 +86,113 @@ async function seed(db) {
       await db.execute({ sql: 'INSERT INTO gallery (title, type, url, caption, sort) VALUES (?, ?, ?, ?, ?)', args: [imgs[i][0], imgs[i][1], imgs[i][2], '', i] });
     }
   }
+
+  const tc = await db.execute('SELECT COUNT(*) AS c FROM testimonials');
+  if (tc.rows[0].c === 0) {
+    const tests = [
+      ['Sarah Mitchell', 'Partner, Chicago', 'SUSA made the entire process seamless. From design to grand opening, their team was with me every step of the way. Our store exceeded every expectation.', 'SM'],
+      ['Marcus Chen', 'Partner, Seattle', 'The design-led approach is what drew me to SUSA. Our customers constantly compliment the space. It is not just a bakery - it is an experience.', 'MC'],
+      ['James & Priya', 'Multi-Unit Partners, DFW', 'We opened our first unit and signed for two more territories. The support system SUSA provides makes scaling effortless.', 'JP'],
+    ];
+    for (let i = 0; i < tests.length; i++) {
+      await db.execute({ sql: 'INSERT INTO testimonials (name, role, quote, rating, initial, sort) VALUES (?, ?, ?, 5, ?, ?)', args: [tests[i][0], tests[i][1], tests[i][2], tests[i][3], i] });
+    }
+  }
+
+  const fc = await db.execute('SELECT COUNT(*) AS c FROM faqs');
+  if (fc.rows[0].c === 0) {
+    const faqRows = [
+      ['home', 'What does the franchise investment include?', 'Your investment covers store design & 3D renders, complete interior fit-out, display counter(s), bakery equipment, furniture, signage, branding materials, staff training, operations manual, and launch support. A one-time \u20B94,999 registration fee applies at application.'],
+      ['home', 'Why should I invest in a bakery franchise in India?', "India's bakery market is valued at over \u20B9800 Crore and growing at 25-30% annually. It's one of the fastest-growing businesses with high demand driven by changing lifestyles and celebrations. With up to 40% profit margins, it's a highly profitable opportunity."],
+      ['home', 'How do I start a bakery franchise with SUSA?', 'Simply fill out our franchise application form or call us. Our team will schedule a discovery call, discuss your goals, and guide you through the entire process from site selection to grand opening.'],
+      ['home', 'What licenses are needed to open a bakery?', "You'll need GST registration, FSSAI license, Local Municipal Corporation Health license, Fire license, and Police Eating House license. The first three are required before opening; the others can be obtained after launch."],
+      ['home', 'How much can I earn from a SUSA franchise?', 'ROI depends on your chosen format, location, and operations. Kiosk owners can expect $5K-$10K monthly, while Flagship operators can earn $35K-$60K monthly. Our team provides detailed projections during the discovery call.'],
+      ['home', 'Do I need bakery experience?', 'No. SUSA is designed for first-time owners as well as experienced operators. We provide comprehensive training, a detailed operations manual, and ongoing support so you can run your store with confidence.'],
+      ['home', 'How long does it take to open?', 'Most SUSA stores open within 10-12 weeks from design approval. Timelines vary by format, site readiness, and local permits.'],
+      ['home', 'What ongoing support do you provide?', 'We offer 24/7 partner support, quarterly business reviews, marketing guidance, supply chain access, menu development assistance, regular menu updates, and access to our partner portal with training resources.'],
+      ['home', 'What makes SUSA different from other franchises?', "SUSA is a turnkey bakery concept - we don't just sell a franchise, we build your entire store. From design to equipment to training, everything is included. Registration is a one-time \u20B94,999; there's no franchise fee."],
+      ['home', 'Can I own multiple SUSA outlets?', 'Yes! Many of our partners operate multiple units. After successfully running your first store, we offer expanded territory opportunities and multi-unit franchise options.'],
+      ['franchise', 'How do I start a bakery franchise with SUSA?', 'Fill out our franchise application form or call us. Our team will schedule a discovery call, discuss your goals, and guide you through the entire process from site selection to grand opening.'],
+      ['franchise', 'What licenses are needed to open a bakery?', "You'll need GST registration, FSSAI license, Local Municipal Corporation Health license, Fire license, and Police Eating House license. The first three are required before opening."],
+      ['franchise', 'How much can I earn from a SUSA franchise?', 'ROI depends on your chosen format, location, and operations. Kiosk owners can expect $5K-$10K monthly, while Flagship operators can earn $35K-$60K monthly.'],
+      ['franchise', 'Do I need bakery experience?', 'No. SUSA is designed for first-time owners as well as experienced operators. We provide comprehensive training and ongoing support.'],
+      ['franchise', 'How long does it take to open?', 'Most SUSA stores open within 10-12 weeks from design approval. Timelines vary by format, site readiness, and local permits.'],
+      ['franchise', 'Can I own multiple SUSA outlets?', 'Yes! Many of our partners operate multiple units. After successfully running your first store, we offer expanded territory opportunities.'],
+      ['contact', 'Is there an application fee?', 'Yes. A one-time, non-refundable registration fee of \u20B94,999 is payable when you submit your franchise application. There is no separate franchise fee - your investment goes directly into your store.'],
+      ['contact', 'What territories are available?', 'We operate on a single-region model to ensure focused support. Contact us to discuss availability in your target area.'],
+      ['contact', 'How long does the process take?', 'Most SUSA stores open within 10-12 weeks from design approval. Timelines vary by format, site readiness, and local permits.'],
+      ['contact', 'Do I need bakery experience?', 'No. Our comprehensive training program and operations manual are designed for first-time owners as well as experienced operators.'],
+      ['contact', 'What ongoing support is provided?', 'We offer 24/7 partner support, quarterly business reviews, marketing guidance, supply chain access, menu development assistance, and access to our partner portal.'],
+      ['contact', 'Can I buy equipment without a franchise?', 'Yes. We supply display counters, bakery equipment, and fit-out services to independent bakeries and other food businesses. Contact us for a trade quote.'],
+    ];
+    for (let i = 0; i < faqRows.length; i++) {
+      await db.execute({ sql: 'INSERT INTO faqs (page, question, answer, sort) VALUES (?, ?, ?, ?)', args: [faqRows[i][0], faqRows[i][1], faqRows[i][2], i] });
+    }
+  }
+
+  const sc = await db.execute('SELECT COUNT(*) AS c FROM services');
+  if (sc.rows[0].c === 0) {
+    const rows = [
+      ['fa-display', 'Display Counters', 'Curved & straight glass counters with integrated LED lighting, temperature control, and modular configurations for any store format.', 'gold'],
+      ['fa-bread-slice', 'Brand Merchandising', 'Wire baskets, hanging racks, hexagon shelves, arched back-wall displays, and glass viennoiserie cases that drive impulse purchases.', 'lavender'],
+      ['fa-building', 'Full Fit-Out', 'Complete store interior design - flooring, ceiling, lighting, materials, branded feature walls, and full project management.', 'gold'],
+      ['fa-couch', 'Caf\u00e9 Seating', 'Industrial, lounge, biophilic, and bar-counter seating styles designed for comfort and atmosphere across every format.', 'lavender'],
+      ['fa-lightbulb', 'Lighting & Signage', 'Dome pendants, track systems, menu board frames, digital screens, and external signage packages that define your brand.', 'green'],
+      ['fa-fire-burner', 'Bakery Equipment', 'Deck ovens, espresso stations, proofer cabinets, mixers, POS hardware, and commercial refrigeration systems.', 'gold'],
+    ];
+    for (let i = 0; i < rows.length; i++) {
+      await db.execute({ sql: 'INSERT INTO services (icon, title, description, color, sort) VALUES (?, ?, ?, ?, ?)', args: [rows[i][0], rows[i][1], rows[i][2], rows[i][3], i] });
+    }
+  }
+
+  const fmtc = await db.execute('SELECT COUNT(*) AS c FROM formats');
+  if (fmtc.rows[0].c === 0) {
+    const rows = [
+      ['Kiosk', '\u20B910 - 15 Lakh', 'Compact high-street kiosk concept with counter service, ideal for malls and transit hubs.'],
+      ['Compact', '\u20B920 - 30 Lakh', 'Full bakery & caf\u00e9 with seating for 12-20 guests, perfect for neighbourhood high streets.'],
+      ['Lounge', '\u20B935 - 50 Lakh', 'Premium caf\u00e9 lounge with seating for 30-50 guests, complete menu range, and merchandising wall.'],
+      ['Flagship', '\u20B950 - 80 Lakh', 'Large-format flagship store with full bakery production, lounge seating, and brand experience centre.'],
+    ];
+    for (let i = 0; i < rows.length; i++) {
+      await db.execute({ sql: 'INSERT INTO formats (name, range, description, sort) VALUES (?, ?, ?, ?)', args: [rows[i][0], rows[i][1], rows[i][2], i] });
+    }
+  }
+
+  const docc = await db.execute('SELECT COUNT(*) AS c FROM documents');
+  if (docc.rows[0].c === 0) {
+    const rows = [
+      ['Udyam Registration', 'fa-certificate', 'images/Print  Udyam Registration Certificate.pdf'],
+      ['Online NOC', 'fa-file-contract', 'images/Online NOC.pdf'],
+      ['Company PAN Card', 'fa-id-card', 'images/PHOTO-2025-11-27-15-19-44.jpg.jpeg'],
+      ['TAN Number', 'fa-hashtag', 'images/PHOTO-2025-11-28-13-44-45.jpg.jpeg'],
+    ];
+    for (let i = 0; i < rows.length; i++) {
+      await db.execute({ sql: 'INSERT INTO documents (title, icon, url, sort) VALUES (?, ?, ?, ?)', args: [rows[i][0], rows[i][1], rows[i][2], i] });
+    }
+  }
+
+  const seoc = await db.execute('SELECT COUNT(*) AS c FROM seo');
+  if (seoc.rows[0].c === 0) {
+    const rows = [
+      ['home', 'SUSA ENTERPRISE — Turnkey Bakery & Café Franchises', 'We build the bakery. You own the brand. SUSA ENTERPRISE delivers turnkey bakery and café franchise concepts — from design and fit-out to equipment and ongoing support.', 'images/Untitled design (2).png', 'bakery franchise, café franchise, turnkey bakery, SUSA Enterprise'],
+      ['about', 'About Us — SUSA ENTERPRISE', 'Learn about SUSA ENTERPRISE — a design-led bakery and café franchise brand delivering turnkey store concepts.', 'images/Untitled design (2).png', ''],
+      ['franchise', 'Franchise Opportunities — SUSA ENTERPRISE', 'Become a SUSA franchise partner. Explore bakery & café franchise opportunities with turnkey store concepts, training, and ongoing support.', 'images/Untitled design (2).png', ''],
+      ['gallery', 'Gallery — SUSA ENTERPRISE', 'Browse SUSA ENTERPRISE store concepts — display counters, brand merchandising, café seating, and full fit-outs.', 'images/Untitled design (2).png', ''],
+      ['services', 'What We Supply — SUSA ENTERPRISE', 'SUSA provides display counters, brand merchandising, full fit-outs, café seating, lighting, and bakery equipment. Every element for your franchise store.', 'images/Untitled design (2).png', ''],
+      ['contact', 'Contact Us — SUSA ENTERPRISE', 'Contact SUSA ENTERPRISE about franchise opportunities, equipment, or general enquiries. Start your bakery journey today.', 'images/Untitled design (2).png', ''],
+      ['privacy', 'Privacy Policy — SUSA ENTERPRISE', 'Read the SUSA ENTERPRISE privacy policy. Learn how we collect, use, and protect your personal information.', 'images/Untitled design (2).png', ''],
+      ['terms', 'Terms & Conditions — SUSA ENTERPRISE', 'The terms that govern your use of the SUSA ENTERPRISE website and franchise application.', 'images/Untitled design (2).png', ''],
+      ['refund', 'Refund Policy — SUSA ENTERPRISE', 'Clear, simple refund terms for the SUSA ENTERPRISE application fee and store investment.', 'images/Untitled design (2).png', ''],
+    ];
+    for (const row of rows) {
+      await db.execute({ sql: 'INSERT OR IGNORE INTO seo (page, title, description, og_image, keywords) VALUES (?, ?, ?, ?, ?)', args: row });
+    }
+  }
 }
 
 function readBody(req) {
   return new Promise((resolve, reject) => {
+    if (req.body !== undefined) { try { resolve(typeof req.body === 'string' ? JSON.parse(req.body) : req.body); return; } catch (e) { reject(new Error('invalid JSON')); return; } }
     let size = 0; const chunks = [];
     req.on('data', c => { size += c.length; if (size > 30*1024*1024) { reject(new Error('too large')); req.destroy(); return; } chunks.push(c); });
     req.on('end', () => { try { resolve(chunks.length ? JSON.parse(Buffer.concat(chunks).toString()) : {}); } catch (e) { reject(new Error('invalid JSON')); } });
@@ -85,4 +216,13 @@ async function currentUser(req, db) {
   return r.rows[0].email;
 }
 
-module.exports = { getDB, readBody, getCookie, currentUser, scryptHash, crypto };
+async function notifyWebhook(db, payload) {
+  try {
+    const r = await db.execute({ sql: 'SELECT value FROM settings WHERE key = ?', args: ['notifyWebhook'] });
+    const url = r.rows[0] && r.rows[0].value;
+    if (!url) return;
+    await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  } catch (e) {}
+}
+
+module.exports = { getDB, readBody, getCookie, currentUser, scryptHash, crypto, notifyWebhook };

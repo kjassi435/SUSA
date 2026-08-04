@@ -197,3 +197,36 @@ body { background: var(--a-bg); font-family: 'Poppins', sans-serif; margin: 0; }
 .sub-detail-row strong { font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; color: var(--a-muted); font-weight: 600; }
 .sub-detail-row span { font-size: 13px; color: var(--a-text); line-height: 1.5; word-break: break-word; }
 .sub-modal-footer { display: flex; align-items: center; justify-content: space-between; padding: 14px 22px; border-top: 1px solid var(--a-border); gap: 10px; flex-wrap: wrap; }
+
+/* ─── UNREAD + PAYMENT ─── */
+.sub-unread td { background: rgba(200,150,46,.06); }
+.sub-unread td:first-child { box-shadow: inset 3px 0 0 var(--a-gold); }
+.sub-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--a-gold); }
+.sub-pay-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 10.5px; font-weight: 600; background: #EAF4EC; color: var(--a-green); }
+
+/* ─── CRUD ROWS ─── */
+.crud-row { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid var(--a-border);
+  border-radius: 12px; background: var(--a-panel); margin-bottom: 8px; }
+.crud-row:hover { border-color: var(--a-gold); }
+.crud-row-main { flex: 1; min-width: 0; }
+.crud-row-title { font-size: 13px; font-weight: 600; color: var(--a-text); }
+.crud-row-sub { font-size: 11.5px; color: var(--a-muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.crud-link { color: var(--a-gold); text-decoration: none; font-size: 11px; }
+.crud-link:hover { text-decoration: underline; }
+.crud-toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; cursor: pointer; }
+.crud-toggle input { opacity: 0; width: 0; height: 0; }
+.crud-toggle i { position: absolute; inset: 0; border-radius: 20px; background: #D8D3C6; transition: all .25s ease; }
+.crud-toggle i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: all .25s ease; }
+.crud-toggle input:checked + i { background: var(--a-green); }
+.crud-toggle input:checked + i::after { transform: translateX(16px); }
+.media-thumb { width: 100%; height: 100%; object-fit: cover; }
+.media-name { display: block; font-size: 11.5px; color: var(--a-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ─── SEO CARDS ─── */
+.seo-card { padding: 16px 18px; border: 1px solid var(--a-border); border-radius: 12px; background: var(--a-panel); margin-bottom: 12px; }
+.seo-card .admin-field input, .seo-card .admin-field textarea { font-size: 12.5px; }
+
+/* ─── TOGGLE STYLE FIELDS IN MODALS ─── */
+.admin-field { display: flex; flex-direction: column; gap: 6px; }
+.admin-field > span { font-size: 11px; font-weight: 600; color: var(--a-muted); text-transform: uppercase; letter-spacing: .4px; }

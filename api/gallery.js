@@ -4,7 +4,12 @@ module.exports = async function handler(req, res) {
   try {
     const db = await getDB();
     if (req.method === 'GET') {
-      const r = await db.execute('SELECT id, title, type, url, caption, sort FROM gallery ORDER BY sort, id');
+      const url = new URL(req.url, 'http://localhost');
+      const publicOnly = url.searchParams.get('public') === '1';
+      const sql = publicOnly
+        ? 'SELECT id, title, type, url, caption, sort FROM gallery WHERE active = 1 ORDER BY sort, id'
+        : 'SELECT id, title, type, url, caption, sort, active FROM gallery ORDER BY sort, id';
+      const r = await db.execute(sql);
       return res.json({ items: r.rows });
     }
     if (req.method === 'POST') {

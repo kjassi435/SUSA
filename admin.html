@@ -48,6 +48,13 @@
       <button class="admin-nav-item active" data-tab="dashboard"><i class="fas fa-gauge-high"></i><span> Dashboard</span></button>
       <button class="admin-nav-item" data-tab="pages"><i class="fas fa-file-lines"></i><span> Pages</span></button>
       <button class="admin-nav-item" data-tab="gallery"><i class="fas fa-images"></i><span> Gallery</span></button>
+      <button class="admin-nav-item" data-tab="media"><i class="fas fa-photo-film"></i><span> Media Library</span></button>
+      <button class="admin-nav-item" data-tab="testimonials"><i class="fas fa-quote-right"></i><span> Testimonials</span></button>
+      <button class="admin-nav-item" data-tab="faqs"><i class="fas fa-circle-question"></i><span> FAQs</span></button>
+      <button class="admin-nav-item" data-tab="services"><i class="fas fa-store"></i><span> Services & Pricing</span></button>
+      <button class="admin-nav-item" data-tab="documents"><i class="fas fa-folder-open"></i><span> Documents</span></button>
+      <button class="admin-nav-item" data-tab="seo"><i class="fas fa-magnifying-glass-chart"></i><span> SEO</span></button>
+      <button class="admin-nav-item" data-tab="promo"><i class="fas fa-bullhorn"></i><span> Promo Bar</span></button>
       <button class="admin-nav-item" data-tab="submissions"><i class="fas fa-envelope-open-text"></i><span> Submissions</span></button>
       <button class="admin-nav-item" data-tab="settings"><i class="fas fa-gear"></i><span> Settings</span></button>
     </nav>
@@ -70,12 +77,21 @@
         <div class="admin-card"><i class="fas fa-edit"></i><strong id="statSections">0</strong><span>Editable Sections</span></div>
         <div class="admin-card"><i class="fas fa-images"></i><strong id="statGallery">0</strong><span>Gallery Items</span></div>
         <div class="admin-card"><i class="fas fa-envelope-open-text"></i><strong id="statSubmissions">0</strong><span>Submissions</span></div>
+        <div class="admin-card"><i class="fas fa-quote-right"></i><strong id="statTestimonials">0</strong><span>Testimonials</span></div>
+        <div class="admin-card"><i class="fas fa-circle-question"></i><strong id="statFaqs">0</strong><span>FAQs</span></div>
       </div>
       <div class="admin-panel">
         <h3>Quick actions</h3>
         <div class="admin-quick-grid">
           <button class="admin-quick" data-go="pages"><i class="fas fa-pen"></i> Edit page content</button>
           <button class="admin-quick" data-go="gallery"><i class="fas fa-images"></i> Manage gallery</button>
+          <button class="admin-quick" data-go="media"><i class="fas fa-photo-film"></i> Media library</button>
+          <button class="admin-quick" data-go="testimonials"><i class="fas fa-quote-right"></i> Testimonials</button>
+          <button class="admin-quick" data-go="faqs"><i class="fas fa-circle-question"></i> FAQs</button>
+          <button class="admin-quick" data-go="services"><i class="fas fa-store"></i> Services & pricing</button>
+          <button class="admin-quick" data-go="documents"><i class="fas fa-folder-open"></i> Documents</button>
+          <button class="admin-quick" data-go="seo"><i class="fas fa-magnifying-glass-chart"></i> SEO</button>
+          <button class="admin-quick" data-go="promo"><i class="fas fa-bullhorn"></i> Promo bar</button>
           <button class="admin-quick" data-go="submissions"><i class="fas fa-envelope-open-text"></i> View submissions</button>
           <button class="admin-quick" data-go="settings"><i class="fas fa-gear"></i> Update contact info</button>
         </div>
@@ -97,6 +113,241 @@
       </div>
     </section>
 
+    <!-- MEDIA LIBRARY -->
+    <section class="admin-tab" id="tab-media">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">Media Library</h3>
+          <label class="admin-btn admin-btn-gold" style="cursor:pointer"><i class="fas fa-upload"></i> Upload Media
+            <input type="file" accept="image/*,video/*" id="mediaUpload" hidden>
+          </label>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Uploaded media is stored in the database so it survives redeploys. Click a thumbnail to copy its URL for use in page images and links.</p>
+        <div class="gallery-grid" id="mediaGrid"></div>
+        <p class="admin-hint" id="mediaEmpty" hidden>No media uploaded yet.</p>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section class="admin-tab" id="tab-testimonials">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">Testimonials</h3>
+          <button class="admin-btn admin-btn-gold" id="addTestimonial"><i class="fas fa-plus"></i> Add Testimonial</button>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Partner reviews shown on the testimonials section. Toggle active to show or hide.</p>
+        <div id="testimonialsList"></div>
+        <p class="admin-hint" id="testimonialsEmpty" hidden>No testimonials yet.</p>
+      </div>
+    </section>
+
+    <!-- TESTIMONIAL MODAL -->
+    <div class="sub-modal" id="testimonialModal" hidden>
+      <div class="sub-modal-overlay" id="testimonialModalOverlay"></div>
+      <div class="sub-modal-card">
+        <div class="sub-modal-header">
+          <h3 id="testimonialModalTitle">Add Testimonial</h3>
+          <button class="sub-modal-close" id="testimonialModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sub-modal-body">
+          <label class="admin-field" style="margin-bottom:10px"><span>Name</span><input type="text" id="tName"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Role / Location</span><input type="text" id="tRole"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Initials (avatar)</span><input type="text" id="tInitial" maxlength="3" placeholder="SM"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Rating (1-5)</span><input type="number" id="tRating" min="1" max="5" value="5"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Quote</span><textarea id="tQuote" rows="4"></textarea></label>
+          <label class="admin-field" style="margin-bottom:4px"><span>Sort order</span><input type="number" id="tSort" value="0"></label>
+          <label class="admin-field" style="margin-bottom:0;flex-direction:row;gap:8px;align-items:center"><input type="checkbox" id="tActive" checked style="width:auto"><span style="margin:0">Active</span></label>
+        </div>
+        <div class="sub-modal-footer">
+          <div style="display:flex;gap:8px">
+            <button class="admin-btn admin-btn-gold" id="tSave"><i class="fas fa-floppy-disk"></i> Save</button>
+            <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="tDelete" hidden><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAQS -->
+    <section class="admin-tab" id="tab-faqs">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">FAQs</h3>
+          <button class="admin-btn admin-btn-gold" id="addFaq"><i class="fas fa-plus"></i> Add FAQ</button>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Questions and answers by page. Select which page the FAQ appears on, or use <em>All pages</em>.</p>
+        <div id="faqsList"></div>
+        <p class="admin-hint" id="faqsEmpty" hidden>No FAQs yet.</p>
+      </div>
+    </section>
+
+    <!-- FAQ MODAL -->
+    <div class="sub-modal" id="faqModal" hidden>
+      <div class="sub-modal-overlay" id="faqModalOverlay"></div>
+      <div class="sub-modal-card">
+        <div class="sub-modal-header">
+          <h3 id="faqModalTitle">Add FAQ</h3>
+          <button class="sub-modal-close" id="faqModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sub-modal-body">
+          <label class="admin-field" style="margin-bottom:10px"><span>Page</span>
+            <select id="fPage">
+              <option value="">All pages</option>
+              <option value="home">Home</option>
+              <option value="franchise">Franchise</option>
+              <option value="contact">Contact</option>
+            </select>
+          </label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Question</span><input type="text" id="fQuestion"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Answer</span><textarea id="fAnswer" rows="4"></textarea></label>
+          <label class="admin-field" style="margin-bottom:4px"><span>Sort order</span><input type="number" id="fSort" value="0"></label>
+          <label class="admin-field" style="margin-bottom:0;flex-direction:row;gap:8px;align-items:center"><input type="checkbox" id="fActive" checked style="width:auto"><span style="margin:0">Active</span></label>
+        </div>
+        <div class="sub-modal-footer">
+          <div style="display:flex;gap:8px">
+            <button class="admin-btn admin-btn-gold" id="fSave"><i class="fas fa-floppy-disk"></i> Save</button>
+            <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="fDelete" hidden><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SERVICES & PRICING -->
+    <section class="admin-tab" id="tab-services">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">What We Supply / Services</h3>
+          <button class="admin-btn admin-btn-gold" id="addService"><i class="fas fa-plus"></i> Add Service</button>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Service cards shown on the services page homepage sections.</p>
+        <div id="servicesList"></div>
+        <p class="admin-hint" id="servicesEmpty" hidden>No services yet.</p>
+      </div>
+      <div class="admin-panel" style="margin-top:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">Franchise Formats & Pricing</h3>
+          <button class="admin-btn admin-btn-gold" id="addFormat"><i class="fas fa-plus"></i> Add Format</button>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Investment ranges shown in the format/pricing table.</p>
+        <div id="formatsList"></div>
+      </div>
+    </section>
+
+    <!-- SERVICES & FORMAT MODALS -->
+    <div class="sub-modal" id="serviceModal" hidden>
+      <div class="sub-modal-overlay" id="serviceModalOverlay"></div>
+      <div class="sub-modal-card">
+        <div class="sub-modal-header">
+          <h3 id="serviceModalTitle">Add Service</h3>
+          <button class="sub-modal-close" id="serviceModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sub-modal-body">
+          <label class="admin-field" style="margin-bottom:10px"><span>Icon (Font Awesome class)</span><input type="text" id="sIcon" placeholder="fa-display"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Color</span>
+            <select id="sColor">
+              <option value="gold">Gold</option>
+              <option value="lavender">Lavender</option>
+              <option value="green">Green</option>
+            </select>
+          </label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Title</span><input type="text" id="sTitle"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Description</span><textarea id="sDesc" rows="3"></textarea></label>
+          <label class="admin-field" style="margin-bottom:4px"><span>Sort order</span><input type="number" id="sSort" value="0"></label>
+          <label class="admin-field" style="margin-bottom:0;flex-direction:row;gap:8px;align-items:center"><input type="checkbox" id="sActive" checked style="width:auto"><span style="margin:0">Active</span></label>
+        </div>
+        <div class="sub-modal-footer">
+          <div style="display:flex;gap:8px">
+            <button class="admin-btn admin-btn-gold" id="sSave"><i class="fas fa-floppy-disk"></i> Save</button>
+            <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="sDelete" hidden><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sub-modal" id="formatModal" hidden>
+      <div class="sub-modal-overlay" id="formatModalOverlay"></div>
+      <div class="sub-modal-card">
+        <div class="sub-modal-header">
+          <h3 id="formatModalTitle">Add Format</h3>
+          <button class="sub-modal-close" id="formatModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sub-modal-body">
+          <label class="admin-field" style="margin-bottom:10px"><span>Name</span><input type="text" id="fmName" placeholder="Kiosk"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Investment range</span><input type="text" id="fmRange" placeholder="₹10 - 15 Lakh"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Description</span><textarea id="fmDesc" rows="3"></textarea></label>
+          <label class="admin-field" style="margin-bottom:4px"><span>Sort order</span><input type="number" id="fmSort" value="0"></label>
+          <label class="admin-field" style="margin-bottom:0;flex-direction:row;gap:8px;align-items:center"><input type="checkbox" id="fmActive" checked style="width:auto"><span style="margin:0">Active</span></label>
+        </div>
+        <div class="sub-modal-footer">
+          <div style="display:flex;gap:8px">
+            <button class="admin-btn admin-btn-gold" id="fmSave"><i class="fas fa-floppy-disk"></i> Save</button>
+            <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="fmDelete" hidden><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <section class="admin-tab" id="tab-documents">
+      <div class="admin-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <h3 style="margin:0">Legal Documents</h3>
+          <button class="admin-btn admin-btn-gold" id="addDocument"><i class="fas fa-plus"></i> Add Document</button>
+        </div>
+        <p class="admin-hint" style="margin-bottom:16px">Company legal documents shown in the about/legal section.</p>
+        <div id="documentsList"></div>
+      </div>
+    </section>
+
+    <!-- DOCUMENT MODAL -->
+    <div class="sub-modal" id="documentModal" hidden>
+      <div class="sub-modal-overlay" id="documentModalOverlay"></div>
+      <div class="sub-modal-card">
+        <div class="sub-modal-header">
+          <h3 id="documentModalTitle">Add Document</h3>
+          <button class="sub-modal-close" id="documentModalClose"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="sub-modal-body">
+          <label class="admin-field" style="margin-bottom:10px"><span>Title</span><input type="text" id="dTitle" placeholder="Udyam Registration"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Icon (Font Awesome class)</span><input type="text" id="dIcon" placeholder="fa-certificate"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>File URL</span><input type="text" id="dUrl" placeholder="images/...pdf"></label>
+          <label class="admin-field" style="margin-bottom:10px"><span>Replace with upload</span>
+            <input type="file" id="dFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="padding:6px;font-size:12px">
+          </label>
+          <label class="admin-field" style="margin-bottom:4px"><span>Sort order</span><input type="number" id="dSort" value="0"></label>
+          <label class="admin-field" style="margin-bottom:0;flex-direction:row;gap:8px;align-items:center"><input type="checkbox" id="dActive" checked style="width:auto"><span style="margin:0">Active</span></label>
+        </div>
+        <div class="sub-modal-footer">
+          <div style="display:flex;gap:8px">
+            <button class="admin-btn admin-btn-gold" id="dSave"><i class="fas fa-floppy-disk"></i> Save</button>
+            <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="dDelete" hidden><i class="fas fa-trash"></i> Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEO -->
+    <section class="admin-tab" id="tab-seo">
+      <div class="admin-panel">
+        <h3>SEO metadata</h3>
+        <p class="admin-hint" style="margin-bottom:16px">Edit the title, meta description, and Open Graph image for each page. Changes are applied via the public renderer.</p>
+        <div id="seoList"></div>
+      </div>
+    </section>
+
+    <!-- PROMO BAR -->
+    <section class="admin-tab" id="tab-promo">
+      <div class="admin-panel">
+        <h3>Announcement / Promo Bar</h3>
+        <p class="admin-hint" style="margin-bottom:16px">Shown as a slim bar at the top of every public page. Leave text empty to hide it.</p>
+        <form id="promoForm" class="admin-form-grid" novalidate>
+          <label class="admin-field"><span>Promo text</span><input type="text" name="promoText" placeholder="Grand opening offers available now"></label>
+          <label class="admin-field"><span>Link URL (optional)</span><input type="text" name="promoUrl" placeholder="https://..."></label>
+          <label class="admin-field" style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" name="promoEnabled" style="width:auto"><span style="margin:0">Enabled</span></label>
+          <button type="submit" class="admin-btn admin-btn-primary" style="grid-column:1/-1">Save Promo Bar <i class="fas fa-floppy-disk"></i></button>
+        </form>
+      </div>
+    </section>
+
     <!-- SETTINGS -->
     <section class="admin-tab" id="tab-settings">
       <div class="admin-panel">
@@ -111,6 +362,7 @@
           <label class="admin-field"><span>Instagram URL</span><input type="text" name="socialInstagram" placeholder="https://instagram.com/..."></label>
           <label class="admin-field"><span>LinkedIn URL</span><input type="text" name="socialLinkedin" placeholder="https://linkedin.com/..."></label>
           <label class="admin-field"><span>Facebook URL</span><input type="text" name="socialFacebook" placeholder="https://facebook.com/..."></label>
+          <label class="admin-field" style="grid-column:1/-1"><span>New submission webhook URL (optional)</span><input type="text" name="notifyWebhook" placeholder="https://hooks.slack.com/services/..."></label>
           <button type="submit" class="admin-btn admin-btn-primary" style="grid-column:1/-1">Save Settings <i class="fas fa-floppy-disk"></i></button>
         </form>
       </div>
@@ -149,18 +401,21 @@
               <option value="in_review">In Review</option>
               <option value="completed">Completed</option>
             </select>
+            <button class="admin-btn" style="padding:6px 12px;font-size:12px" id="csvExport"><i class="fas fa-file-csv"></i> Export CSV</button>
           </div>
         </div>
         <div class="submissions-table-wrap">
           <table class="submissions-table" id="submissionsTable">
             <thead>
               <tr>
+                <th></th>
                 <th>ID</th>
                 <th>Type</th>
                 <th>Name</th>
                 <th>Email</th>
                 <th>Phone</th>
                 <th>Status</th>
+                <th>Payment</th>
                 <th>Date</th>
                 <th>Actions</th>
               </tr>
@@ -182,14 +437,24 @@
         </div>
         <div class="sub-modal-body" id="subModalBody"></div>
         <div class="sub-modal-footer">
-          <select id="subModalStatus" class="admin-field" style="width:auto;padding:8px 12px;font-size:12px">
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
-            <option value="in_review">In Review</option>
-            <option value="completed">Completed</option>
-          </select>
+          <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:180px">
+            <select id="subModalStatus" class="admin-field" style="width:100%;padding:8px 12px;font-size:12px">
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="in_review">In Review</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select id="subModalPayment" class="admin-field" style="width:100%;padding:8px 12px;font-size:12px">
+              <option value="">Payment: —</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="failed">Failed</option>
+              <option value="refunded">Refunded</option>
+            </select>
+            <p class="admin-hint" id="subModalPaymentId" style="margin:0;font-size:11px"></p>
+          </div>
           <div style="display:flex;gap:8px">
-            <button class="admin-btn admin-btn-gold" id="subModalSave"><i class="fas fa-floppy-disk"></i> Update Status</button>
+            <button class="admin-btn admin-btn-gold" id="subModalSave"><i class="fas fa-floppy-disk"></i> Update</button>
             <button class="admin-btn" style="background:var(--a-danger);color:#fff" id="subModalDelete"><i class="fas fa-trash"></i> Delete</button>
           </div>
         </div>
