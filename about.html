@@ -25,6 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="page-id" content="about">
 </head>
 <body>
 <header class="header" id="header">
@@ -61,16 +62,16 @@
   </div>
 
 <!-- PAGE HERO -->
-<section class="page-hero">
+<section class="page-hero" data-section="hero">
   <div class="container">
-    <span class="label">Our Story</span>
-    <h1>About SUSA ENTERPRISE</h1>
-    <p>A design-led bakery &amp; café franchise brand delivering turnkey store concepts from first draft to grand opening.</p>
+    <span class="label" data-field="badge">Our Story</span>
+    <h1 data-field="heading">About SUSA ENTERPRISE</h1>
+    <p data-field="description" data-type="html">A design-led bakery &amp; café franchise brand delivering turnkey store concepts from first draft to grand opening.</p>
   </div>
 </section>
 
 <!-- WHO WE ARE -->
-<section class="section">
+<section class="section" data-section="story">
   <div class="container">
     <div class="alt-grid">
       <div class="fade-left">
@@ -80,8 +81,8 @@
       </div>
       <div class="fade-right">
         <span class="label">Who We Are</span>
-        <h2 class="title">From wheat to <em>storefront</em></h2>
-        <p class="text text-lg">SUSA ENTERPRISE was born from a simple belief: a bakery should be as beautiful as the food it serves. We design, build, and deliver complete store concepts that make that belief a reality.</p>
+        <h2 class="title" data-field="heading">From wheat to <em>storefront</em></h2>
+        <p class="text text-lg" data-field="content" data-type="html">SUSA ENTERPRISE was born from a simple belief: a bakery should be as beautiful as the food it serves. We design, build, and deliver complete store concepts that make that belief a reality.</p>
         <p class="text">Our emblem — two wheat ears forming an oval wreath — represents the journey from seed to storefront. The gold of the wheat echoes warmth, craftsmanship, and the premium quality we bring to every project.</p>
         <div class="features-grid" style="margin-top:24px">
           <div class="icon-box"><i class="fas fa-wheat-awn"></i><div><strong>Wheat Heritage</strong><span>Rooted in the tradition of artisan baking</span></div></div>
@@ -132,11 +133,11 @@
 </section>
 
 <!-- VISION & MISSION -->
-<section class="section" style="background:var(--cream)">
+<section class="section" data-section="mission" style="background:var(--cream)">
   <div class="container">
     <div class="section-header fade-up">
       <span class="label">Our Purpose</span>
-      <h2 class="title">Vision &amp; <em>Mission</em></h2>
+      <h2 class="title" data-field="heading">Vision &amp; <em>Mission</em></h2>
     </div>
     <div class="features-grid" style="max-width:900px;margin:0 auto">
       <div class="icon-box fade-up" style="padding:24px">
@@ -251,5 +252,6 @@
   </div>
 </footer>
 <script src="js/main.js"></script>
+<script src="js/renderer.js"></script>
 </body>
 </html>

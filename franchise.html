@@ -36,6 +36,7 @@
     .commitment-list li i{color:var(--green);font-size:14px;margin-top:2px;flex-shrink:0}
     @media(max-width:768px){.pricing-table{font-size:12px}.pricing-table th,.pricing-table td{padding:10px 8px}}
   </style>
+  <meta name="page-id" content="franchise">
 </head>
 <body>
 <header class="header" id="header">
@@ -72,11 +73,11 @@
   </div>
 
 <!-- HERO -->
-<section class="page-hero">
+<section class="page-hero" data-section="hero">
   <div class="container">
-    <span class="label">Franchise Opportunities</span>
+    <span class="label" data-field="badge">Franchise Opportunities</span>
     <h1>Become a <em>SUSA Partner</em></h1>
-    <p>More possibilities, more success for you. Be a SUSApreneur — an entrepreneur, a business owner. Make more profit with a proven bakery concept.</p>
+    <p data-field="description" data-type="html">More possibilities, more success for you. Be a SUSApreneur — an entrepreneur, a business owner. Make more profit with a proven bakery concept.</p>
   </div>
 </section>
 
@@ -327,13 +328,13 @@
 </section>
 
 <!-- THE PROCESS -->
-<section class="section-sm" style="background:linear-gradient(160deg,var(--primary) 0%,var(--secondary) 50%,var(--secondary-light) 100%);color:var(--white);position:relative;overflow:hidden">
+<section class="section-sm" data-section="process" style="background:linear-gradient(160deg,var(--primary) 0%,var(--secondary) 50%,var(--secondary-light) 100%);color:var(--white);position:relative;overflow:hidden">
   <div style="position:absolute;top:-50%;right:-20%;width:600px;height:600px;background:radial-gradient(circle,rgba(200,150,46,0.08) 0%,transparent 70%);pointer-events:none"></div>
   <div class="container" style="position:relative;z-index:1">
     <div class="section-header fade-up">
       <span class="label" style="color:var(--gold-light)">The Process</span>
-      <h2 class="title" style="color:var(--white)">Your journey to opening day</h2>
-      <p class="text" style="color:rgba(255,255,255,0.5)">From enquiry to grand opening — clear, supported, every step of the way.</p>
+      <h2 class="title" style="color:var(--white)" data-field="heading">Your journey to opening day</h2>
+      <p class="text" style="color:rgba(255,255,255,0.5)" data-field="intro" data-type="html">From enquiry to grand opening — clear, supported, every step of the way.</p>
     </div>
     <div class="process-grid">
       <div class="step-card fade-up">
@@ -365,7 +366,7 @@
 </section>
 
 <!-- FRANCHISE COMMITMENTS -->
-<section class="section" style="background:var(--white)">
+<section class="section" data-section="commitments" style="background:var(--white)">
   <div class="container">
     <div class="alt-grid">
       <div class="fade-left">
@@ -405,11 +406,11 @@
 </section>
 
 <!-- WHY CHOOSE SUSA -->
-<section class="section-sm" style="background:var(--cream)">
+<section class="section-sm" data-section="whyChoose" style="background:var(--cream)">
   <div class="container">
     <div class="section-header fade-up">
       <span class="label">Why SUSA</span>
-      <h2 class="title">Why choose SUSA as your <em>bakery partner</em></h2>
+      <h2 class="title" data-field="heading">Why choose SUSA as your <em>bakery partner</em></h2>
     </div>
     <div class="features-grid" style="max-width:900px;margin:0 auto">
       <div class="icon-box fade-up"><i class="fas fa-rocket"></i><div><strong>India's Fastest Growing</strong><span>One of the fastest-growing bakery franchise concepts in the country</span></div></div>
@@ -423,48 +424,48 @@
 </section>
 
 <!-- FAQ -->
-<section class="section" style="background:var(--white)">
+<section class="section" data-section="faq" style="background:var(--white)">
   <div class="container" style="max-width:720px">
     <div class="section-header fade-up">
       <span class="label">FAQ</span>
-      <h2 class="title">Franchise <em>questions</em></h2>
+      <h2 class="title" data-field="heading">Franchise <em>questions</em></h2>
     </div>
     <div class="fade-up">
       <details class="faq-item" open>
-        <summary>How do I start a bakery franchise with SUSA?</summary>
-        <p>Fill out our franchise application form or call us. Our team will schedule a discovery call, discuss your goals, and guide you through the entire process from site selection to grand opening.</p>
+        <summary data-field="q1">How do I start a bakery franchise with SUSA?</summary>
+        <p data-field="a1" data-type="html">Fill out our franchise application form or call us. Our team will schedule a discovery call, discuss your goals, and guide you through the entire process from site selection to grand opening.</p>
       </details>
       <details class="faq-item">
-        <summary>What licenses are needed to open a bakery?</summary>
-        <p>You'll need GST registration, FSSAI license, Local Municipal Corporation Health license, Fire license, and Police Eating House license. The first three are required before opening.</p>
+        <summary data-field="q2">What licenses are needed to open a bakery?</summary>
+        <p data-field="a2" data-type="html">You'll need GST registration, FSSAI license, Local Municipal Corporation Health license, Fire license, and Police Eating House license. The first three are required before opening.</p>
       </details>
       <details class="faq-item">
-        <summary>How much can I earn from a SUSA franchise?</summary>
-        <p>ROI depends on your chosen format, location, and operations. Kiosk owners can expect $5K-$10K monthly, while Flagship operators can earn $35K-$60K monthly.</p>
+        <summary data-field="q3">How much can I earn from a SUSA franchise?</summary>
+        <p data-field="a3" data-type="html">ROI depends on your chosen format, location, and operations. Kiosk owners can expect $5K-$10K monthly, while Flagship operators can earn $35K-$60K monthly.</p>
       </details>
       <details class="faq-item">
-        <summary>Do I need bakery experience?</summary>
-        <p>No. SUSA is designed for first-time owners as well as experienced operators. We provide comprehensive training and ongoing support.</p>
+        <summary data-field="q4">Do I need bakery experience?</summary>
+        <p data-field="a4" data-type="html">No. SUSA is designed for first-time owners as well as experienced operators. We provide comprehensive training and ongoing support.</p>
       </details>
       <details class="faq-item">
-        <summary>How long does it take to open?</summary>
-        <p>Most SUSA stores open within 10-12 weeks from design approval. Timelines vary by format, site readiness, and local permits.</p>
+        <summary data-field="q5">How long does it take to open?</summary>
+        <p data-field="a5" data-type="html">Most SUSA stores open within 10-12 weeks from design approval. Timelines vary by format, site readiness, and local permits.</p>
       </details>
       <details class="faq-item">
-        <summary>Can I own multiple SUSA outlets?</summary>
-        <p>Yes! Many of our partners operate multiple units. After successfully running your first store, we offer expanded territory opportunities.</p>
+        <summary data-field="q6">Can I own multiple SUSA outlets?</summary>
+        <p data-field="a6" data-type="html">Yes! Many of our partners operate multiple units. After successfully running your first store, we offer expanded territory opportunities.</p>
       </details>
     </div>
   </div>
 </section>
 
 <!-- CTA -->
-<section class="cta section" style="background:linear-gradient(160deg,var(--primary) 0%,var(--secondary) 40%,var(--gold-dark) 100%)">
+<section class="cta section" data-section="cta" style="background:linear-gradient(160deg,var(--primary) 0%,var(--secondary) 40%,var(--gold-dark) 100%)">
   <div class="container fade-up" style="text-align:center">
     <span class="label" style="color:var(--gold-light)">Ready to Start?</span>
-    <h2 style="font-family:var(--font-heading);font-size:clamp(28px,5vw,44px);font-weight:700;color:var(--white);margin-bottom:14px;line-height:1.15">Apply for a <em style="font-style:italic;color:var(--gold-light)">SUSA franchise</em></h2>
-    <p style="color:rgba(255,255,255,0.55);max-width:440px;margin:0 auto 32px;font-size:15px">Take the first step toward a beautiful, proven bakery concept. Register for just ₹4,999.</p>
-    <a href="franchise.html#franchise-form" class="btn btn-primary btn-lg">Apply Now <i class="fas fa-arrow-right"></i></a>
+    <h2 style="font-family:var(--font-heading);font-size:clamp(28px,5vw,44px);font-weight:700;color:var(--white);margin-bottom:14px;line-height:1.15" data-field="heading">Apply for a <em style="font-style:italic;color:var(--gold-light)">SUSA franchise</em></h2>
+    <p style="color:rgba(255,255,255,0.55);max-width:440px;margin:0 auto 32px;font-size:15px" data-field="description" data-type="html">Take the first step toward a beautiful, proven bakery concept. Register for just ₹4,999.</p>
+    <a href="franchise.html#franchise-form" class="btn btn-primary btn-lg" data-field="btnText">Apply Now <i class="fas fa-arrow-right"></i></a>
   </div>
 </section>
 
@@ -481,6 +482,7 @@
   </div>
 </footer>
 <script src="js/main.js"></script>
+<script src="js/renderer.js"></script>
 <script>
 (function(){
   var form = document.getElementById('franchiseForm');

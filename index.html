@@ -25,6 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="page-id" content="home">
 </head>
 <body>
 
@@ -62,33 +63,33 @@
 </div>
 
 <!-- ═══════════ HERO ═══════════ -->
-<section class="hero" id="home" style="padding:72px 0 0;background:var(--cream)">
-  <img src="images/hero-banner.png" alt="SUSA Enterprise — Premium Bakery & Café Franchise" style="width:100%;display:block" loading="eager">
+<section class="hero" id="home" data-section="hero" style="padding:72px 0 0;background:var(--cream)">
+  <img src="images/hero-banner.png" alt="SUSA Enterprise — Premium Bakery & Café Franchise" data-field="heroImage" data-type="image" style="width:100%;display:block" loading="eager">
 </section>
 
 <!-- ═══════════ BRANDS / TRUST STRIP ═══════════ -->
-<section class="section-sm" style="background:var(--white)">
+<section class="section-sm" data-section="stats" style="background:var(--white)">
   <div class="container">
     <div class="stats-box-grid fade-up">
       <div class="stats-box">
         <div class="stats-box-icon"><i class="fas fa-store"></i></div>
-        <div class="stats-box-num">4+</div>
-        <div class="stats-box-label">Store Formats</div>
+        <div class="stats-box-num" data-field="stat1Num">4+</div>
+        <div class="stats-box-label" data-field="stat1Label">Store Formats</div>
       </div>
       <div class="stats-box">
         <div class="stats-box-icon"><i class="fas fa-display"></i></div>
-        <div class="stats-box-num">12+</div>
-        <div class="stats-box-label">Counter Models</div>
+        <div class="stats-box-num" data-field="stat2Num">12+</div>
+        <div class="stats-box-label" data-field="stat2Label">Counter Models</div>
       </div>
       <div class="stats-box">
         <div class="stats-box-icon"><i class="fas fa-layer-group"></i></div>
-        <div class="stats-box-num">6</div>
-        <div class="stats-box-label">Product Lines</div>
+        <div class="stats-box-num" data-field="stat3Num">6</div>
+        <div class="stats-box-label" data-field="stat3Label">Product Lines</div>
       </div>
       <div class="stats-box">
         <div class="stats-box-icon"><i class="fas fa-truck-fast"></i></div>
-        <div class="stats-box-num">50+</div>
-        <div class="stats-box-label">Fit-Outs Delivered</div>
+        <div class="stats-box-num" data-field="stat4Num">50+</div>
+        <div class="stats-box-label" data-field="stat4Label">Fit-Outs Delivered</div>
       </div>
       <div class="stats-box">
         <div class="stats-box-icon"><i class="fas fa-headset"></i></div>
@@ -130,12 +131,12 @@
 </section>
 
 <!-- ═══════════ SIX PRODUCT LINES ═══════════ -->
-<section class="section-sm" style="background:var(--white)">
+<section class="section-sm" data-section="productLines" style="background:var(--white)">
   <div class="container">
     <div class="section-header fade-up">
       <span class="label">What We Deliver</span>
-      <h2 class="title">Six product lines. <em>One complete store.</em></h2>
-      <p class="text">From display counters to deck ovens — we supply every element of a SUSA franchise store.</p>
+      <h2 class="title" data-field="heading">Six product lines. <em>One complete store.</em></h2>
+      <p class="text" data-field="intro">From display counters to deck ovens — we supply every element of a SUSA franchise store.</p>
     </div>
     <div class="services-grid">
       <div class="service-card fade-up">
@@ -214,12 +215,12 @@
 </section>
 
 <!-- ═══════════ GALLERY PREVIEW ═══════════ -->
-<section class="section" style="background:var(--cream)">
+<section class="section" data-section="galleryStrip" style="background:var(--cream)">
   <div class="container">
     <div class="section-header fade-up">
       <span class="label">Store Concepts</span>
-      <h2 class="title">A glimpse of what we <em>build</em></h2>
-      <p class="text">Every SUSA store is a complete, repeatable concept. Browse our portfolio.</p>
+      <h2 class="title" data-field="heading">A glimpse of what we <em>build</em></h2>
+      <p class="text" data-field="description">Every SUSA store is a complete, repeatable concept. Browse our portfolio.</p>
     </div>
     <div class="expand-gallery fade-up">
       <div class="expand-gallery-item">
@@ -381,32 +382,32 @@
 </section>
 
 <!-- ═══════════ FAQ PREVIEW ═══════════ -->
-<section class="section" style="background:var(--white)">
+<section class="section" data-section="faq" style="background:var(--white)">
   <div class="container" style="max-width:720px">
     <div class="section-header fade-up">
       <span class="label">FAQ</span>
-      <h2 class="title">Frequently asked <em>questions</em></h2>
+      <h2 class="title" data-field="heading">Frequently asked <em>questions</em></h2>
     </div>
     <div class="fade-up">
       <details class="faq-item" open>
-        <summary>What does the franchise investment include?</summary>
-        <p>Your investment covers store design &amp; 3D renders, complete interior fit-out, display counter(s), bakery equipment, furniture, signage, branding materials, staff training, operations manual, and launch support. A one-time ₹4,999 registration fee applies at application.</p>
+        <summary data-field="q1">What does the franchise investment include?</summary>
+        <p data-field="a1" data-type="html">Your investment covers store design &amp; 3D renders, complete interior fit-out, display counter(s), bakery equipment, furniture, signage, branding materials, staff training, operations manual, and launch support. A one-time ₹4,999 registration fee applies at application.</p>
       </details>
       <details class="faq-item">
-        <summary>Why should I invest in a bakery franchise in India?</summary>
-        <p>India's bakery market is valued at over ₹800 Crore and growing at 25-30% annually. It's one of the fastest-growing businesses with high demand driven by changing lifestyles and celebrations. With up to 40% profit margins, it's a highly profitable opportunity.</p>
+        <summary data-field="q2">Why should I invest in a bakery franchise in India?</summary>
+        <p data-field="a2" data-type="html">India's bakery market is valued at over ₹800 Crore and growing at 25-30% annually. It's one of the fastest-growing businesses with high demand driven by changing lifestyles and celebrations. With up to 40% profit margins, it's a highly profitable opportunity.</p>
       </details>
       <details class="faq-item">
-        <summary>How do I start a bakery franchise with SUSA?</summary>
-        <p>Simply fill out our franchise application form or call us. Our team will schedule a discovery call, discuss your goals, and guide you through the entire process from site selection to grand opening.</p>
+        <summary data-field="q3">How do I start a bakery franchise with SUSA?</summary>
+        <p data-field="a3" data-type="html">Simply fill out our franchise application form or call us. Our team will schedule a discovery call, discuss your goals, and guide you through the entire process from site selection to grand opening.</p>
       </details>
       <details class="faq-item">
-        <summary>What licenses are needed to open a bakery?</summary>
-        <p>You'll need GST registration, FSSAI license, Local Municipal Corporation Health license, Fire license, and Police Eating House license. The first three are required before opening; the others can be obtained after launch.</p>
+        <summary data-field="q4">What licenses are needed to open a bakery?</summary>
+        <p data-field="a4" data-type="html">You'll need GST registration, FSSAI license, Local Municipal Corporation Health license, Fire license, and Police Eating House license. The first three are required before opening; the others can be obtained after launch.</p>
       </details>
       <details class="faq-item">
-        <summary>How much can I earn from a SUSA franchise?</summary>
-        <p>ROI depends on your chosen format, location, and operations. Kiosk owners can expect $5K-$10K monthly, while Flagship operators can earn $35K-$60K monthly. Our team provides detailed projections during the discovery call.</p>
+        <summary data-field="q5">How much can I earn from a SUSA franchise?</summary>
+        <p data-field="a5" data-type="html">ROI depends on your chosen format, location, and operations. Kiosk owners can expect $5K-$10K monthly, while Flagship operators can earn $35K-$60K monthly. Our team provides detailed projections during the discovery call.</p>
       </details>
       <details class="faq-item">
         <summary>Do I need bakery experience?</summary>
@@ -489,5 +490,6 @@
 </footer>
 
 <script src="js/main.js"></script>
+<script src="js/renderer.js"></script>
 </body>
 </html>

@@ -25,6 +25,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="page-id" content="contact">
 </head>
 <body>
 <header class="header" id="header">
@@ -61,16 +62,16 @@
   </div>
 
 <!-- PAGE HERO -->
-<section class="page-hero">
+<section class="page-hero" data-section="hero">
   <div class="container">
-    <span class="label">Get in Touch</span>
+    <span class="label" data-field="badge">Get in Touch</span>
     <h1>Let's start the<br><em>conversation</em></h1>
-    <p>Whether you're interested in becoming a franchise partner, buying equipment, or just exploring — we'd love to hear from you.</p>
+    <p data-field="description" data-type="html">Whether you're interested in becoming a franchise partner, buying equipment, or just exploring — we'd love to hear from you.</p>
   </div>
 </section>
 
 <!-- CONTACT SECTION -->
-<section class="section" style="background:var(--cream)">
+<section class="section" data-section="info" style="background:var(--cream)">
   <div class="container">
     <div class="franchise-form-wrap">
       <div class="franchise-form-left fade-left">
@@ -280,36 +281,28 @@
 </section>
 
 <!-- FAQ -->
-<section class="section" style="background:var(--white)">
+<section class="section" data-section="faq" style="background:var(--white)">
   <div class="container" style="max-width:720px">
     <div class="section-header fade-up">
       <span class="label">FAQ</span>
-      <h2 class="title">Frequently asked <em>questions</em></h2>
+      <h2 class="title" data-field="heading">Frequently asked <em>questions</em></h2>
     </div>
     <div class="fade-up">
       <details class="faq-item" open>
-        <summary>Is there an application fee?</summary>
-        <p>Yes. A one-time, non-refundable registration fee of ₹4,999 is payable when you submit your franchise application. There is no separate franchise fee — your investment goes directly into your store.</p>
+        <summary data-field="q1">Is there an application fee?</summary>
+        <p data-field="a1" data-type="html">Yes. A one-time, non-refundable registration fee of ₹4,999 is payable when you submit your franchise application. There is no separate franchise fee — your investment goes directly into your store.</p>
       </details>
       <details class="faq-item">
-        <summary>What territories are available?</summary>
-        <p>We operate on a single-region model to ensure focused support. Contact us to discuss availability in your target area.</p>
+        <summary data-field="q2">What territories are available?</summary>
+        <p data-field="a2" data-type="html">We operate on a single-region model to ensure focused support. Contact us to discuss availability in your target area.</p>
       </details>
       <details class="faq-item">
-        <summary>How long does the process take?</summary>
-        <p>Most SUSA stores open within 10—12 weeks from design approval. Timelines vary by format, site readiness, and local permits.</p>
+        <summary data-field="q3">How long does the process take?</summary>
+        <p data-field="a3" data-type="html">Most SUSA stores open within 10—12 weeks from design approval. Timelines vary by format, site readiness, and local permits.</p>
       </details>
       <details class="faq-item">
-        <summary>Do I need bakery experience?</summary>
-        <p>No. Our comprehensive training program and operations manual are designed for first-time owners as well as experienced operators.</p>
-      </details>
-      <details class="faq-item">
-        <summary>What ongoing support is provided?</summary>
-        <p>We offer 24/7 partner support, quarterly business reviews, marketing guidance, supply chain access, menu development assistance, and access to our partner portal.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Can I buy equipment without a franchise?</summary>
-        <p>Yes. We supply display counters, bakery equipment, and fit-out services to independent bakeries and other food businesses. Contact us for a trade quote.</p>
+        <summary data-field="q4">Do I need bakery experience?</summary>
+        <p data-field="a4" data-type="html">No. Our comprehensive training program and operations manual are designed for first-time owners as well as experienced operators.</p>
       </details>
     </div>
   </div>
@@ -387,5 +380,6 @@
   });
 })();
 </script>
+<script src="js/renderer.js"></script>
 </body>
 </html>
