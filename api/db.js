@@ -4,10 +4,10 @@ let db = null;
 
 async function getDB() {
   if (db) return db;
-  db = createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
+  const url = process.env.TURSO_DATABASE_URL;
+  const token = process.env.TURSO_AUTH_TOKEN;
+  if (!url) throw new Error('TURSO_DATABASE_URL is not set');
+  db = createClient({ url, authToken: token || undefined });
   await db.execute('CREATE TABLE IF NOT EXISTS users (email TEXT PRIMARY KEY, password_hash TEXT NOT NULL, created_at INTEGER NOT NULL)');
   await db.execute('CREATE TABLE IF NOT EXISTS sessions (token TEXT PRIMARY KEY, email TEXT NOT NULL, created_at INTEGER NOT NULL, expires_at INTEGER NOT NULL)');
   await db.execute('CREATE TABLE IF NOT EXISTS content (key TEXT PRIMARY KEY, page TEXT NOT NULL, label TEXT NOT NULL, html TEXT NOT NULL DEFAULT \'\', updated_at INTEGER NOT NULL)');
