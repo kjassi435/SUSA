@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://shusha-enterprise.netlify.app/sitemap.xml

@@ -1,41 +1,46 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
+# Build output
+.next/
+out/
+build/
+dist/
 
-# testing
-/coverage
+# Environment files
+.env
+.env.*
+!.env.example
 
-# next.js
-/.next/
-/out/
+# Database (recreated on first run)
+data/
 
-# production
-/build
+# User uploads
+uploads/
 
-# misc
+# OS files
 .DS_Store
-*.pem
+Thumbs.db
+Desktop.ini
 
-# debug
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
+# Misc
+*.pem
 *.tsbuildinfo
-next-env.d.ts
+.vercel
+coverage/
+
+# Local Netlify folder
+.netlify
