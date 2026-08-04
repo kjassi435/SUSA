@@ -8,5 +8,10 @@
   },
   "engines": {
     "node": ">=22.5"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.4",
+    "@vercel/node": "^5.9.5",
+    "dotenv": "^17.4.2"
   }
 }
