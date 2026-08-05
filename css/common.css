@@ -558,8 +558,8 @@ img{max-width:100%;height:auto}
   .expand-gallery{flex-direction:column!important}
   .expand-gallery-item{height:180px!important;min-width:0!important}
   .commit-section-grid{gap:24px!important}
-  .commit-list-item{flex-direction:column;text-align:center}
-  .commit-list-icon{margin-bottom:8px}
+  .commit-list-item{flex-direction:column;text-align:center;align-items:center}
+  .commit-list-icon{margin:0 auto 8px}
   .commit-section-grid .fade-right{order:-1}
   .cta .container{padding:0 20px}
   .cta h2{font-size:clamp(22px,6vw,32px)!important}
