@@ -388,6 +388,7 @@ img{max-width:100%;display:block}
   .hero h1{font-size:clamp(40px,5vw,52px)}
   .test-grid{grid-template-columns:repeat(2,1fr)}
   .stats-box-grid{grid-template-columns:repeat(3,1fr);gap:16px}
+  .stats-box-grid .stats-box:nth-child(5){grid-column:2;max-width:none}
 }
 
 /* ═══════════════ DESKTOP ═══════════════ */
@@ -530,6 +531,7 @@ img{max-width:100%;height:auto}
   .services-grid{grid-template-columns:1fr!important}
   .test-grid{grid-template-columns:1fr!important}
   .stats-box-grid{grid-template-columns:repeat(2,1fr)!important;gap:12px}
+  .stats-box-grid .stats-box:nth-child(5){grid-column:1/-1;max-width:50%;justify-self:center}
   .alt-grid,.hero-grid,.commit-section-grid,.contact-grid{grid-template-columns:1fr!important;gap:32px}
   .process-grid{grid-template-columns:1fr!important}
   .gallery-grid{grid-template-columns:repeat(2,1fr)!important}
