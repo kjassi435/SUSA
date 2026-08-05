@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://shusha-enterprise.netlify.app/sitemap.xml
+Sitemap: https://www.susaenterprise.com/sitemap.xml

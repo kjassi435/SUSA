@@ -1,47 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://shusha-enterprise.netlify.app/</loc>
+    <loc>https://www.susaenterprise.com/</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/about.html</loc>
+    <loc>https://www.susaenterprise.com/about.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/franchise.html</loc>
+    <loc>https://www.susaenterprise.com/franchise.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/gallery.html</loc>
+    <loc>https://www.susaenterprise.com/gallery.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/services.html</loc>
+    <loc>https://www.susaenterprise.com/services.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/contact.html</loc>
+    <loc>https://www.susaenterprise.com/contact.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/privacy.html</loc>
+    <loc>https://www.susaenterprise.com/privacy.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/terms.html</loc>
+    <loc>https://www.susaenterprise.com/terms.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://shusha-enterprise.netlify.app/refund.html</loc>
+    <loc>https://www.susaenterprise.com/refund.html</loc>
+    <lastmod>2026-08-05</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
