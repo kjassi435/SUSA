@@ -1,4 +1,4 @@
-const { getDB, currentUser } = require('./db');
+const { getDB, currentUser } = require('../lib/db');
 
 module.exports = async function handler(req, res) {
   try {

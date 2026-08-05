@@ -209,13 +209,13 @@
   // ─── MAIN ───
   var jobs = [
     fetch('/api/content?page=' + encodeURIComponent(pageId)),
-    fetch('/api/seo?public=1&page=' + encodeURIComponent(pageId)).catch(function () { return { json: function () { return Promise.resolve({}); } }; }),
-    fetch('/api/promo?public=1').catch(function () { return { json: function () { return Promise.resolve({}); } }; }),
-    fetch('/api/testimonials?public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
-    fetch('/api/services?public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
-    fetch('/api/formats?public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
-    fetch('/api/documents?public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
-    fetch('/api/faqs?public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
+    fetch('/api/tables?table=seo&public=1&page=' + encodeURIComponent(pageId)).catch(function () { return { json: function () { return Promise.resolve({}); } }; }),
+    fetch('/api/tables?table=promo&public=1').catch(function () { return { json: function () { return Promise.resolve({}); } }; }),
+    fetch('/api/tables?table=testimonials&public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
+    fetch('/api/tables?table=services&public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
+    fetch('/api/tables?table=formats&public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
+    fetch('/api/tables?table=documents&public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
+    fetch('/api/tables?table=faqs&public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; }),
     fetch('/api/gallery?public=1').catch(function () { return { json: function () { return Promise.resolve({ items: [] }); } }; })
   ];
 

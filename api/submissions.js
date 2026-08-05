@@ -1,4 +1,4 @@
-const { getDB, readBody, currentUser, notifyWebhook } = require('./db');
+const { getDB, readBody, currentUser, notifyWebhook } = require('../lib/db');
 
 module.exports = async function handler(req, res) {
   try {

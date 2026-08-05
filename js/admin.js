@@ -275,8 +275,8 @@
       await api('/api/content');
       const gallery = await api('/api/gallery');
       const subs = await api('/api/submissions').catch(() => ({ submissions: [] }));
-      const tests = await api('/api/testimonials').catch(() => ({ items: [] }));
-      const faqs = await api('/api/faqs').catch(() => ({ items: [] }));
+      const tests = await api('/api/tables?table=testimonials').catch(() => ({ items: [] }));
+      const faqs = await api('/api/tables?table=faqs').catch(() => ({ items: [] }));
       $('#statPages').textContent = PAGES.length;
       $('#statSections').textContent = PAGES.reduce((n, p) => n + p.sections.length, 0);
       $('#statGallery').textContent = gallery.items.length;
@@ -428,7 +428,7 @@
     const preview = e.target.closest('.admin-image-row').querySelector('.admin-image-preview');
     try {
       const dataBase64 = await fileToDataURL(file);
-      const media = await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: (file.type || '').startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
+      const media = await api('/api/tables?table=media_lib', { method: 'POST', body: JSON.stringify({ name: file.name, type: (file.type || '').startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
       const url = '/api/blob?id=' + media.id;
       input.value = url;
       if (preview) { preview.src = url; preview.style.display = ''; }
@@ -499,7 +499,7 @@
       div.querySelector('.gallery-save-btn').addEventListener('click', async () => {
         const title = div.querySelector('.gallery-item-title').value;
         try {
-          await api('/api/gallery/' + item.id, { method: 'PUT', body: JSON.stringify({ title, type: item.type, url: item.url, caption: item.caption || '' }) });
+          await api('/api/gallery?id=' + item.id, { method: 'PUT', body: JSON.stringify({ title, type: item.type, url: item.url, caption: item.caption || '' }) });
           toast('Updated ✓');
         } catch (e) { toast(e.message, 'error'); }
       });
@@ -521,7 +521,7 @@
     if (!file) return;
     try {
       const dataBase64 = await fileToDataURL(file);
-      const media = await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: 'image', url: '', data64: dataBase64, size: file.size }) });
+      const media = await api('/api/tables?table=media_lib', { method: 'POST', body: JSON.stringify({ name: file.name, type: 'image', url: '', data64: dataBase64, size: file.size }) });
       await api('/api/gallery', { method: 'POST', body: JSON.stringify({ title: file.name.replace(/\.[^.]+$/, ''), type: 'image', url: '/api/blob?id=' + media.id, caption: '' }) });
       toast('Image uploaded ✓');
       loadGallery();
@@ -659,7 +659,7 @@
     grid.innerHTML = '<p class="admin-hint">Loading...</p>';
     empty.hidden = true;
     try {
-      const res = await api('/api/media-library');
+      const res = await api('/api/tables?table=media_lib');
       const items = res.items || [];
       if (!items.length) { grid.innerHTML = ''; empty.hidden = false; return; }
       state.mediaItems = items;
@@ -699,7 +699,7 @@
         ev.stopPropagation();
         if (!confirm('Delete this media item?\nNote: pages referencing it will break.')) return;
         try {
-          await api('/api/media-library?id=' + item.id, { method: 'DELETE' });
+          await api('/api/tables?table=media_lib&id=' + item.id, { method: 'DELETE' });
           state.mediaItems = state.mediaItems.filter(m => m.id !== item.id);
           renderMediaGrid();
           toast('Deleted ✓');
@@ -714,7 +714,7 @@
     if (!file) return;
     try {
       const dataBase64 = await fileToDataURL(file);
-      await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: (file.type || '').startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
+      await api('/api/tables?table=media_lib', { method: 'POST', body: JSON.stringify({ name: file.name, type: (file.type || '').startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
       toast('Media uploaded ✓');
       loadMediaLibrary();
     } catch (err) { toast(err.message, 'error'); }
@@ -750,7 +750,7 @@
     list.innerHTML = '<p class="admin-hint">Loading...</p>';
     empty.hidden = true;
     try {
-      const res = await api('/api/testimonials');
+      const res = await api('/api/tables?table=testimonials');
       testimonialsCache = res.items || [];
       if (!testimonialsCache.length) { list.innerHTML = ''; empty.hidden = false; return; }
       renderTestimonials();
@@ -768,9 +768,9 @@
         esc((t.quote || '').slice(0, 90)) + (t.quote && t.quote.length > 90 ? '…' : ''),
         {
           onToggle: () => !!t.active,
-          onToggleCb: async (checked) => { t.active = checked ? 1 : 0; try { await api('/api/testimonials?id=' + t.id, { method: 'PUT', body: JSON.stringify({ active: t.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onToggleCb: async (checked) => { t.active = checked ? 1 : 0; try { await api('/api/tables?table=testimonials?id=' + t.id, { method: 'PUT', body: JSON.stringify({ active: t.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
           onEdit: () => openTestimonialModal(t),
-          onDelete: async () => { if (!confirm('Delete this testimonial?')) return; try { await api('/api/testimonials?id=' + t.id, { method: 'DELETE' }); testimonialsCache = testimonialsCache.filter(x => x.id !== t.id); renderTestimonials(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+          onDelete: async () => { if (!confirm('Delete this testimonial?')) return; try { await api('/api/tables?table=testimonials?id=' + t.id, { method: 'DELETE' }); testimonialsCache = testimonialsCache.filter(x => x.id !== t.id); renderTestimonials(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
         }
       ));
     });
@@ -807,8 +807,8 @@
     };
     if (!body.name) return toast('Name is required', 'error');
     try {
-      if (testimonialEditingId) await api('/api/testimonials?id=' + testimonialEditingId, { method: 'PUT', body: JSON.stringify(body) });
-      else await api('/api/testimonials', { method: 'POST', body: JSON.stringify(body) });
+      if (testimonialEditingId) await api('/api/tables?table=testimonials?id=' + testimonialEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/tables?table=testimonials', { method: 'POST', body: JSON.stringify(body) });
       toast('Saved ✓');
       $('#testimonialModal').hidden = true;
       loadTestimonials();
@@ -818,7 +818,7 @@
   $('#tDelete').addEventListener('click', async () => {
     if (!confirm('Delete this testimonial?')) return;
     try {
-      await api('/api/testimonials?id=' + testimonialEditingId, { method: 'DELETE' });
+      await api('/api/tables?table=testimonials?id=' + testimonialEditingId, { method: 'DELETE' });
       toast('Deleted ✓');
       $('#testimonialModal').hidden = true;
       loadTestimonials();
@@ -833,7 +833,7 @@
     list.innerHTML = '<p class="admin-hint">Loading...</p>';
     empty.hidden = true;
     try {
-      const res = await api('/api/faqs');
+      const res = await api('/api/tables?table=faqs');
       faqsCache = res.items || [];
       if (!faqsCache.length) { list.innerHTML = ''; empty.hidden = false; return; }
       renderFaqs();
@@ -851,9 +851,9 @@
         esc((f.answer || '').slice(0, 90)) + (f.answer && f.answer.length > 90 ? '…' : '') + pageBadge,
         {
           onToggle: () => !!f.active,
-          onToggleCb: async (checked) => { f.active = checked ? 1 : 0; try { await api('/api/faqs?id=' + f.id, { method: 'PUT', body: JSON.stringify({ active: f.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onToggleCb: async (checked) => { f.active = checked ? 1 : 0; try { await api('/api/tables?table=faqs?id=' + f.id, { method: 'PUT', body: JSON.stringify({ active: f.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
           onEdit: () => openFaqModal(f),
-          onDelete: async () => { if (!confirm('Delete this FAQ?')) return; try { await api('/api/faqs?id=' + f.id, { method: 'DELETE' }); faqsCache = faqsCache.filter(x => x.id !== f.id); renderFaqs(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+          onDelete: async () => { if (!confirm('Delete this FAQ?')) return; try { await api('/api/tables?table=faqs?id=' + f.id, { method: 'DELETE' }); faqsCache = faqsCache.filter(x => x.id !== f.id); renderFaqs(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
         }
       ));
     });
@@ -886,8 +886,8 @@
     };
     if (!body.question) return toast('Question is required', 'error');
     try {
-      if (faqEditingId) await api('/api/faqs?id=' + faqEditingId, { method: 'PUT', body: JSON.stringify(body) });
-      else await api('/api/faqs', { method: 'POST', body: JSON.stringify(body) });
+      if (faqEditingId) await api('/api/tables?table=faqs?id=' + faqEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/tables?table=faqs', { method: 'POST', body: JSON.stringify(body) });
       toast('Saved ✓');
       $('#faqModal').hidden = true;
       loadFaqs();
@@ -897,7 +897,7 @@
   $('#fDelete').addEventListener('click', async () => {
     if (!confirm('Delete this FAQ?')) return;
     try {
-      await api('/api/faqs?id=' + faqEditingId, { method: 'DELETE' });
+      await api('/api/tables?table=faqs?id=' + faqEditingId, { method: 'DELETE' });
       toast('Deleted ✓');
       $('#faqModal').hidden = true;
       loadFaqs();
@@ -912,7 +912,7 @@
     list.innerHTML = '<p class="admin-hint">Loading...</p>';
     empty.hidden = true;
     try {
-      const res = await api('/api/services');
+      const res = await api('/api/tables?table=services');
       servicesCache = res.items || [];
       if (!servicesCache.length) { list.innerHTML = ''; empty.hidden = false; }
       else renderServices();
@@ -929,9 +929,9 @@
         esc((s.description || '').slice(0, 90)) + (s.description && s.description.length > 90 ? '…' : ''),
         {
           onToggle: () => !!s.active,
-          onToggleCb: async (checked) => { s.active = checked ? 1 : 0; try { await api('/api/services?id=' + s.id, { method: 'PUT', body: JSON.stringify({ active: s.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onToggleCb: async (checked) => { s.active = checked ? 1 : 0; try { await api('/api/tables?table=services?id=' + s.id, { method: 'PUT', body: JSON.stringify({ active: s.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
           onEdit: () => openServiceModal(s),
-          onDelete: async () => { if (!confirm('Delete this service?')) return; try { await api('/api/services?id=' + s.id, { method: 'DELETE' }); servicesCache = servicesCache.filter(x => x.id !== s.id); renderServices(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+          onDelete: async () => { if (!confirm('Delete this service?')) return; try { await api('/api/tables?table=services?id=' + s.id, { method: 'DELETE' }); servicesCache = servicesCache.filter(x => x.id !== s.id); renderServices(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
         }
       ));
     });
@@ -966,8 +966,8 @@
     };
     if (!body.title) return toast('Title is required', 'error');
     try {
-      if (serviceEditingId) await api('/api/services?id=' + serviceEditingId, { method: 'PUT', body: JSON.stringify(body) });
-      else await api('/api/services', { method: 'POST', body: JSON.stringify(body) });
+      if (serviceEditingId) await api('/api/tables?table=services?id=' + serviceEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/tables?table=services', { method: 'POST', body: JSON.stringify(body) });
       toast('Saved ✓');
       $('#serviceModal').hidden = true;
       loadServices();
@@ -977,7 +977,7 @@
   $('#sDelete').addEventListener('click', async () => {
     if (!confirm('Delete this service?')) return;
     try {
-      await api('/api/services?id=' + serviceEditingId, { method: 'DELETE' });
+      await api('/api/tables?table=services?id=' + serviceEditingId, { method: 'DELETE' });
       toast('Deleted ✓');
       $('#serviceModal').hidden = true;
       loadServices();
@@ -990,7 +990,7 @@
     const list = $('#formatsList');
     list.innerHTML = '<p class="admin-hint">Loading...</p>';
     try {
-      const res = await api('/api/formats');
+      const res = await api('/api/tables?table=formats');
       formatsCache = res.items || [];
       renderFormats();
     } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
@@ -1006,9 +1006,9 @@
         esc((fm.description || '').slice(0, 90)) + (fm.description && fm.description.length > 90 ? '…' : ''),
         {
           onToggle: () => !!fm.active,
-          onToggleCb: async (checked) => { fm.active = checked ? 1 : 0; try { await api('/api/formats?id=' + fm.id, { method: 'PUT', body: JSON.stringify({ active: fm.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onToggleCb: async (checked) => { fm.active = checked ? 1 : 0; try { await api('/api/tables?table=formats?id=' + fm.id, { method: 'PUT', body: JSON.stringify({ active: fm.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
           onEdit: () => openFormatModal(fm),
-          onDelete: async () => { if (!confirm('Delete this format?')) return; try { await api('/api/formats?id=' + fm.id, { method: 'DELETE' }); formatsCache = formatsCache.filter(x => x.id !== fm.id); renderFormats(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+          onDelete: async () => { if (!confirm('Delete this format?')) return; try { await api('/api/tables?table=formats?id=' + fm.id, { method: 'DELETE' }); formatsCache = formatsCache.filter(x => x.id !== fm.id); renderFormats(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
         }
       ));
     });
@@ -1041,8 +1041,8 @@
     };
     if (!body.name) return toast('Name is required', 'error');
     try {
-      if (formatEditingId) await api('/api/formats?id=' + formatEditingId, { method: 'PUT', body: JSON.stringify(body) });
-      else await api('/api/formats', { method: 'POST', body: JSON.stringify(body) });
+      if (formatEditingId) await api('/api/tables?table=formats?id=' + formatEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/tables?table=formats', { method: 'POST', body: JSON.stringify(body) });
       toast('Saved ✓');
       $('#formatModal').hidden = true;
       loadFormats();
@@ -1052,7 +1052,7 @@
   $('#fmDelete').addEventListener('click', async () => {
     if (!confirm('Delete this format?')) return;
     try {
-      await api('/api/formats?id=' + formatEditingId, { method: 'DELETE' });
+      await api('/api/tables?table=formats?id=' + formatEditingId, { method: 'DELETE' });
       toast('Deleted ✓');
       $('#formatModal').hidden = true;
       loadFormats();
@@ -1065,7 +1065,7 @@
     const list = $('#documentsList');
     list.innerHTML = '<p class="admin-hint">Loading...</p>';
     try {
-      const res = await api('/api/documents');
+      const res = await api('/api/tables?table=documents');
       documentsCache = res.items || [];
       renderDocuments();
     } catch (e) { list.innerHTML = '<p class="admin-hint">Error: ' + esc(e.message) + '</p>'; }
@@ -1083,9 +1083,9 @@
         esc(d.url || ''),
         {
           onToggle: () => !!d.active,
-          onToggleCb: async (checked) => { d.active = checked ? 1 : 0; try { await api('/api/documents?id=' + d.id, { method: 'PUT', body: JSON.stringify({ active: d.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
+          onToggleCb: async (checked) => { d.active = checked ? 1 : 0; try { await api('/api/tables?table=documents?id=' + d.id, { method: 'PUT', body: JSON.stringify({ active: d.active }) }); toast('Updated ✓'); } catch (e) { toast(e.message, 'error'); } },
           onEdit: () => openDocumentModal(d),
-          onDelete: async () => { if (!confirm('Delete this document?')) return; try { await api('/api/documents?id=' + d.id, { method: 'DELETE' }); documentsCache = documentsCache.filter(x => x.id !== d.id); renderDocuments(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
+          onDelete: async () => { if (!confirm('Delete this document?')) return; try { await api('/api/tables?table=documents?id=' + d.id, { method: 'DELETE' }); documentsCache = documentsCache.filter(x => x.id !== d.id); renderDocuments(); toast('Deleted ✓'); } catch (e) { toast(e.message, 'error'); } }
         }
       ));
     });
@@ -1114,7 +1114,7 @@
     if (!file) return;
     try {
       const dataBase64 = await fileToDataURL(file);
-      const media = await api('/api/media-library', { method: 'POST', body: JSON.stringify({ name: file.name, type: file.type && file.type.startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
+      const media = await api('/api/tables?table=media_lib', { method: 'POST', body: JSON.stringify({ name: file.name, type: file.type && file.type.startsWith('video') ? 'video' : 'image', url: '', data64: dataBase64, size: file.size }) });
       $('#dUrl').value = '/api/blob?id=' + media.id;
       toast('File uploaded — URL set ✓');
     } catch (err) { toast(err.message, 'error'); }
@@ -1130,8 +1130,8 @@
     };
     if (!body.title || !body.url) return toast('Title and URL are required', 'error');
     try {
-      if (documentEditingId) await api('/api/documents?id=' + documentEditingId, { method: 'PUT', body: JSON.stringify(body) });
-      else await api('/api/documents', { method: 'POST', body: JSON.stringify(body) });
+      if (documentEditingId) await api('/api/tables?table=documents?id=' + documentEditingId, { method: 'PUT', body: JSON.stringify(body) });
+      else await api('/api/tables?table=documents', { method: 'POST', body: JSON.stringify(body) });
       toast('Saved ✓');
       $('#documentModal').hidden = true;
       loadDocuments();
@@ -1141,7 +1141,7 @@
   $('#dDelete').addEventListener('click', async () => {
     if (!confirm('Delete this document?')) return;
     try {
-      await api('/api/documents?id=' + documentEditingId, { method: 'DELETE' });
+      await api('/api/tables?table=documents?id=' + documentEditingId, { method: 'DELETE' });
       toast('Deleted ✓');
       $('#documentModal').hidden = true;
       loadDocuments();
@@ -1153,7 +1153,7 @@
     const list = $('#seoList');
     list.innerHTML = '<p class="admin-hint">Loading...</p>';
     try {
-      const res = await api('/api/seo');
+      const res = await api('/api/tables?table=seo');
       const items = res.items || [];
       list.innerHTML = '';
       items.forEach(s => {
@@ -1173,7 +1173,7 @@
           const data = { page: s.page };
           card.querySelectorAll('.seo-field').forEach(inp => { data[inp.dataset.k] = inp.value; });
           try {
-            await api('/api/seo', { method: 'PUT', body: JSON.stringify(data) });
+            await api('/api/tables?table=seo', { method: 'PUT', body: JSON.stringify(data) });
             toast('SEO saved ✓');
           } catch (e) { toast(e.message, 'error'); }
         });
@@ -1185,7 +1185,7 @@
   // ─── PROMO BAR ───
   async function loadPromo() {
     try {
-      const res = await api('/api/promo');
+      const res = await api('/api/tables?table=promo');
       $('#promoForm').elements['promoText'].value = res.text || '';
       $('#promoForm').elements['promoUrl'].value = res.url || '';
       $('#promoForm').elements['promoEnabled'].checked = res.enabled === '1' || res.enabled === 'true' || res.enabled === true;
@@ -1196,7 +1196,7 @@
     e.preventDefault();
     const enabled = $('#promoForm').elements['promoEnabled'].checked ? '1' : '';
     try {
-      await api('/api/promo', { method: 'PUT', body: JSON.stringify({ enabled, text: e.target.elements['promoText'].value, url: e.target.elements['promoUrl'].value }) });
+      await api('/api/tables?table=promo', { method: 'PUT', body: JSON.stringify({ enabled, text: e.target.elements['promoText'].value, url: e.target.elements['promoUrl'].value }) });
       toast('Promo bar saved ✓');
     } catch (err) { toast(err.message, 'error'); }
   });

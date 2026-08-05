@@ -1,4 +1,4 @@
-const { getDB } = require('./db');
+const { getDB } = require('../lib/db');
 
 module.exports = async function handler(req, res) {
   const result = { ok: true, hasUrl: !!process.env.TURSO_DATABASE_URL, hasToken: !!process.env.TURSO_AUTH_TOKEN, dbOk: false, dbError: null };
