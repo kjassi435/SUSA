@@ -388,7 +388,6 @@ img{max-width:100%;display:block}
   .hero h1{font-size:clamp(40px,5vw,52px)}
   .test-grid{grid-template-columns:repeat(2,1fr)}
   .stats-box-grid{grid-template-columns:repeat(3,1fr);gap:16px}
-  .stats-box-grid .stats-box:nth-child(5){grid-column:2;max-width:none}
 }
 
 /* ═══════════════ DESKTOP ═══════════════ */
