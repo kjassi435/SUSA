@@ -1,4 +1,5 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+.seo-h1{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;left:-9999px}
 :root{
   --cream:#FAF6F1;--cream-light:#FFFDF8;--cream-dark:#F0E8DD;
   --gold:#C8962E;--gold-light:#E8C97A;--gold-dark:#A07C22;--gold-bg:rgba(200,150,46,0.06);--gold-glow:rgba(200,150,46,0.15);

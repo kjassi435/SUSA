@@ -129,9 +129,10 @@
   function renderFaqs(items) {
     var targets = $$('[data-collection="faqs"]');
     if (!targets.length) return;
+    var scoped = items.filter(function (f) { return f.active === 1; })
+      .filter(function (f) { return !f.page || f.page === pageId || f.page === ''; });
     targets.forEach(function (wrap) {
-      var list = items.filter(function (f) { return f.active === 1; });
-      list = list.filter(function (f) { return !f.page || f.page === pageId || f.page === ''; });
+      var list = scoped;
       if (!list.length) return;
       if (wrap.querySelector('.faq-item') && wrap.getAttribute('data-managed') !== '1') {
         // Keep static seed FAQ and only append extra managed FAQ rows
@@ -146,6 +147,29 @@
         wrap.appendChild(d);
       });
     });
+    injectFaqSchema(scoped);
+  }
+
+  function injectFaqSchema(list) {
+    if (!list || !list.length) return;
+    var prev = document.getElementById('susa-faq-schema');
+    if (prev) prev.parentNode.removeChild(prev);
+    var data = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: list.map(function (f) {
+        return {
+          '@type': 'Question',
+          name: f.question || '',
+          acceptedAnswer: { '@type': 'Answer', text: (f.answer || '').replace(/<[^>]*>/g, '') }
+        };
+      })
+    };
+    var s = document.createElement('script');
+    s.type = 'application/ld+json';
+    s.id = 'susa-faq-schema';
+    s.textContent = JSON.stringify(data);
+    document.head.appendChild(s);
   }
 
   function galleryCategory(g) {
