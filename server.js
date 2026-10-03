@@ -7,12 +7,20 @@ const { createClient } = require('@libsql/client');
 
 const ROOT = __dirname;
 const PORT = Number(process.env.PORT) || 3001;
-const UPLOAD_DIR = path.join(ROOT, 'uploads');
+const UPLOAD_DIR = (() => {
+  try {
+    const dir = path.join(ROOT, 'uploads');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    return dir;
+  } catch {
+    // Serverless (read-only FS): use /tmp so boot never crashes; uploads are ephemeral there.
+    const tmp = '/tmp/uploads';
+    try { if (!fs.existsSync(tmp)) fs.mkdirSync(tmp, { recursive: true }); } catch {}
+    return tmp;
+  }
+})();
 const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_BODY = 30 * 1024 * 1024;
-
-if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-
 let db;
 
 async function connectDB() {
